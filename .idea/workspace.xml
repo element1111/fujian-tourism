@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="3f356f6f-3603-4b7a-8b4d-a98e433e8833" name="更改" comment="细节优化表数据增加，分页样式优化————公司" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;TangYiNan&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:TangYiNan/HometownTourism.git&quot;,
+    &quot;accountId&quot;: &quot;35797ea0-c4ae-4b07-9e55-c9bab8dc656d&quot;
+  }
+}</component>
+  <component name="MavenImportPreferences">
+    <option name="generalSettings">
+      <MavenGeneralSettings>
+        <option name="alwaysUpdateSnapshots" value="true" />
+      </MavenGeneralSettings>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="2uWpUf5Kami5NuWHkaR4QmfEvZQ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Maven.HometownTourism [clean].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Notification.DisplayName-DoNotAsk-git.bad.executable": "无法运行 Git",
+    "Notification.DoNotAsk-git.bad.executable": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Spring Boot.后端服务启动.executor": "Run",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Dev/【26T004】家乡文旅宣传系统/程序源代码/HometownTourism/src/main/webapp/Tourism/img",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "项目",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.21849711",
+    "settings.editor.selected.configurable": "MavenSettings",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Dev\【26T004】家乡文旅宣传系统\程序源代码\HometownTourism\src\main\webapp\Tourism\img" />
+      <recent name="E:\GitHub\项目代码_2025\基于springboot家乡文旅宣传系统\HometownTourism\src\main\webapp\upload" />
+      <recent name="E:\GitHub\项目代码_2025\基于springboot家乡文旅宣传系统\HometownTourism\src\main\java\com\tourism\controller" />
+      <recent name="E:\GitHub\项目代码_2025\基于springboot家乡文旅宣传系统\HometownTourism\src\main\java\com\tourism\dao" />
+      <recent name="E:\GitHub\项目代码_2025\基于springboot家乡文旅宣传系统\HometownTourism\src\main\java\com\tourism\entity" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="后端服务启动" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <module name="HometownTourism" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.tourism.SpringBootApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.22562.145" />
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-IU-243.22562.145" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="应用程序级" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="3f356f6f-3603-4b7a-8b4d-a98e433e8833" name="更改" comment="" />
+      <created>1742374201666</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1742374201666</updated>
+      <workItem from="1742374202758" duration="22000" />
+      <workItem from="1742374243784" duration="5721000" />
+      <workItem from="1769044638025" duration="13002000" />
+      <workItem from="1769131241519" duration="272000" />
+      <workItem from="1769408168672" duration="1460000" />
+      <workItem from="1776256951799" duration="8825000" />
+      <workItem from="1776301400207" duration="3483000" />
+      <workItem from="1776332949159" duration="706000" />
+      <workItem from="1776333693488" duration="668000" />
+      <workItem from="1776334377040" duration="537000" />
+      <workItem from="1776334931269" duration="5158000" />
+      <workItem from="1776340508645" duration="5219000" />
+      <workItem from="1776401028289" duration="2053000" />
+      <workItem from="1776513141946" duration="16141000" />
+      <workItem from="1776548104491" duration="3043000" />
+      <workItem from="1776574412268" duration="3032000" />
+      <workItem from="1776676755964" duration="4463000" />
+      <workItem from="1776747866826" duration="9223000" />
+      <workItem from="1776781028259" duration="4671000" />
+      <workItem from="1776832727376" duration="8327000" />
+    </task>
+    <task id="LOCAL-00001" summary="增加收藏表，更新target">
+      <option name="closed" value="true" />
+      <created>1742375254962</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1742375254962</updated>
+    </task>
+    <task id="LOCAL-00002" summary="收藏和详情优化——回家优化提示样式，完善功能方案">
+      <option name="closed" value="true" />
+      <created>1742378431694</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1742378431694</updated>
+    </task>
+    <task id="LOCAL-00003" summary="细节优化表数据增加，分页样式优化————公司">
+      <option name="closed" value="true" />
+      <created>1742432459090</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1742432459090</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="dependencySupport" implementationName="java:org.springframework:spring-core" />
+    <option featureType="dependencySupport" implementationName="java:junit:junit" />
+    <option featureType="dependencySupport" implementationName="java:org.hibernate.validator:hibernate-validator" />
+    <option featureType="dependencySupport" implementationName="maven-packaging:war" />
+    <option featureType="dependencySupport" implementationName="java:javax.validation:validation-api" />
+    <option featureType="dependencySupport" implementationName="java:org.springframework.boot:spring-boot" />
+    <option featureType="dependencySupport" implementationName="java:org.springframework:spring-webmvc" />
+    <option featureType="dependencySupport" implementationName="java:org.projectlombok:lombok" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="增加收藏表，更新target" />
+    <MESSAGE value="收藏和详情优化——回家优化提示样式，完善功能方案" />
+    <MESSAGE value="细节优化表数据增加，分页样式优化————公司" />
+    <option name="LAST_COMMIT_MESSAGE" value="细节优化表数据增加，分页样式优化————公司" />
+  </component>
+</project>

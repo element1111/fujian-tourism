@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>八闽福建 - 个人信息管理</title>
+    <!-- 网站图标 -->
+    <link rel="shortcut icon" type="image/png" href="../Tourism/img/logo.png">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="assets/css/template-admin.css" />
+</head>
+<body class="list-page">
+
+<div class="kf-page-container">
+    <div id="app" v-cloak>
+        <!-- 页面标题区域 -->
+        <div class="kf-page-header">
+            <div class="kf-page-title">
+                <h2>个人信息管理</h2>
+            </div>
+        </div>
+        
+        <!-- 内容卡片 -->
+        <div class="kf-card">
+            <div class="kf-card-header">
+                <h3>个人信息设置</h3>
+            </div>
+            <div class="kf-card-body">
+                <div class="kf-form-container">
+                    <el-form :model="admin" label-width="80px" class="kf-form">
+                        <el-form-item label="头像">
+                            <div class="layui-upload">
+                                <div class="layui-upload-list">
+                                    <input type="hidden" v-model="admin.filename" id="filename" value="no-img.png"/>
+                                    <img class="layui-upload-img" id="imgname" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%; border: 1px solid #eee;">
+                                    <p id="demoText"></p>
+                                </div>
+                                <button type="button" class="kf-btn" id="test1"><i class="el-icon-upload"></i> 上传头像</button>
+                            </div>
+                        </el-form-item>
+
+                        <el-form-item label="登录名">
+                            <el-input v-model="admin.username" readonly placeholder="登录名"></el-input>
+                        </el-form-item>
+
+                        <el-form-item label="密码">
+                            <el-input type="password" v-model="admin.userpwd" placeholder="密码"></el-input>
+                        </el-form-item>
+
+                        <el-form-item label="姓名">
+                            <el-input v-model="admin.realname" placeholder="姓名"></el-input>
+                        </el-form-item>
+
+                        <el-form-item label="性别">
+                            <el-select v-model="admin.sex" placeholder="请选择性别" style="width: 100%">
+                                <el-option label="男" value="男"></el-option>
+                                <el-option label="女" value="女"></el-option>
+                            </el-select>
+                        </el-form-item>
+
+                        <el-form-item label="电话">
+                            <el-input v-model="admin.tel" placeholder="电话"></el-input>
+                        </el-form-item>
+
+                        <el-form-item>
+                            <el-button type="primary" @click="edit">保存修改</el-button>
+                        </el-form-item>
+                    </el-form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <div class="kf-footer">
+            <p>八闽福建 © {{ currentYear }} 版权所有</p>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/template-admin.js"></script>
+<script type="text/javascript">
+    var qs = Qs
+    var vmm = new Vue({
+        el: '#app',
+        data: {
+            currentYear: new Date().getFullYear(),
+            admin: {
+                username:"",
+                userpwd:"",
+                realname:"",
+                filename:"",
+                sex:"",
+                tel:"",
+                id:"",
+            },
+        },
+        mounted() {
+            this.show()
+            this.$nextTick(function(){
+                var img = "";
+                layui.use(['form', 'layer', 'upload'], function () {
+                    $ = layui.jquery;
+                    var form = layui.form
+                        , layer = layui.layer
+                        , upload = layui.upload;
+
+                    //普通图片上传
+                    layui.use('upload', function () {
+                        var $ = layui.jquery
+                            , upload = layui.upload;
+
+                        //普通图片上传
+                        var uploadInst = upload.render({
+                            elem: '#test1'
+                            , url: '/admin/uploadImg'
+                            , accept: 'images'
+                            , size: 50000
+                            , before: function (obj) {
+                                obj.preview(function (index, file, result) {
+                                    $('#imgname').attr('src', result);
+                                });
+                            }
+                            , done: function (res) {
+                                //如果上传失败
+                                if (res.code > 0) {
+                                    return vmm.$message.error('上传失败');
+                                }
+                                //上传成功
+                                var demoText = $('#demoText');
+                                demoText.html('<span style="color: #4cae4c;">上传成功</span>');
+                                var fileupload = $(".image");
+                                fileupload.attr("value", res.data.src);
+                                vmm.admin.filename = res.data.src
+                                console.log(res.data.src);
+                                img = res.data.src;
+                                vmm.$message({
+                                    message: '头像上传成功',
+                                    type: 'success'
+                                });
+                            }
+                            , error: function () {
+                                //演示失败状态，并实现重传
+                                var demoText = $('#demoText');
+                                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                                demoText.find('.demo-reload').on('click', function () {
+                                    uploadInst.upload();
+                                });
+                                vmm.$message.error('上传失败，请重试');
+                            }
+                        });
+                    });
+                });
+            })
+        },
+        methods: {
+            show(){
+                axios.post('/admin/checkadmin',qs.stringify({
+                })).then(response =>{
+                    if(response.data.data==200){
+                        this.admin = response.data.admin
+                        $('#imgname').attr('src', "../upload/"+this.admin.filename); //图片链接（base64）
+                    }else{
+                        location.replace("login.html")
+                    }
+                }).catch(error =>{
+                    console.log(error)
+                })
+            },
+            edit() {
+                if(this.admin.userpwd==""){
+                    this.$message({
+                        message: '密码不能为空',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if(this.admin.realname==""){
+                    this.$message({
+                        message: '姓名不能为空',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if(this.admin.tel==""){
+                    this.$message({
+                        message: '电话不能为空',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                
+                this.$confirm('确认保存修改的个人信息吗?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    customClass: 'kf-confirm-dialog'
+                }).then(() => {
+                    axios.post('/admin/userEdit',qs.stringify({
+                        userpwd:this.admin.userpwd,
+                        realname:this.admin.realname,
+                        filename:this.admin.filename,
+                        sex:this.admin.sex,
+                        tel:this.admin.tel,
+                        id:this.admin.id,
+                    })).then(response =>{
+                        this.$message({
+                            message: '个人信息修改成功',
+                            type: 'success'
+                        });
+                    }).catch(error =>{
+                        this.$message.error('操作失败，请重试');
+                        console.log(error)
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消修改'
+                    });
+                });
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

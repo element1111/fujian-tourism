@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" id="theme-change" type="text/css" href="#">
+    <!-- title Link -->
+    <link rel="shortcut icon" type="image/png" href="assets/images/title.png">
+    <link rel="stylesheet" href="assets/css/template-admin.css" />
+
+
+</head>
+<body>
+
+<div class="page-wrapper" style="margin-top: 10px;">
+    <div class="main-content">
+        <div class="from-wrapper" id="app">
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4>信息</h4>
+                            <!--<p class="card-desc">Here are examples of form add <code>.form</code>tag with inputs.</p>-->
+                        </div>
+                        <div class="card-body">
+                            <form>
+                                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+
+
+                                    <div class="form-group row">
+                                        <label class="col-md-2 col-form-label">LOGO</label>
+                                        <div class="col-md-10">
+                                            <div class="layui-upload">
+                                                <div class="layui-upload-list">
+                                                    <input type="hidden" v-model="about.filename" id="filename" value="no-img.png"/>
+                                                    <img class="layui-upload-img" id="imgname" style="width: 10%">
+                                                    <p id="demoText"></p>
+                                                </div>
+                                                <button type="button" class="layui-btn" id="test1"><i class="layui-icon"></i>上传LOGO</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="form-group row">
+                                        <label class="col-md-2 col-form-label">名称</label>
+                                        <div class="col-md-10">
+                                            <input class="form-control" type="text" v-model="about.name" placeholder="名称">
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group row">
+                                        <label class="col-md-2 col-form-label">餐馆种类</label>
+                                        <div class="col-md-10">
+                                            <input class="form-control" type="text" v-model="about.category" placeholder="餐馆种类">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-md-2 col-form-label">运营时间</label>
+                                        <div class="col-md-10">
+                                            <input class="form-control" type="text" v-model="about.opentime" placeholder="运营时间">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label class="col-md-2 col-form-label">联系电话</label>
+                                        <div class="col-md-10">
+                                            <input class="form-control" type="text" v-model="about.tel" placeholder="联系电话">
+                                        </div>
+                                    </div>
+
+
+                                    <div class="form-group row">
+                                        <label class="col-md-2 col-form-label">详情地址</label>
+                                        <div class="col-md-10">
+                                            <input class="form-control" type="text" v-model="about.addr" placeholder="详情地址">
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="form-group row mb-0">
+                                        <div class="col-sm-10 offset-sm-2">
+                                            <button class="btn btn-primary" type="button" @click="add()">提交</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="ad-footer-btm">
+            <p>Copyright {{ currentYear }} © </p>
+        </div>
+    </div>
+</div>
+<script src="assets/js/template-admin.js"></script>
+<script type="text/javascript">
+    var qs = Qs
+    var vmm = new Vue({
+        el: '#app',
+        data: {
+            currentYear: new Date().getFullYear(),
+            about: {
+                name:"",
+                filename:"no-img.png",
+                category:"",
+                opentime:"",
+                tel:"",
+                addr:"",
+                id:1,
+            },
+
+        },
+        mounted() {
+            this.show()
+            this.$nextTick(function(){
+                var img = "";
+                layui.use(['form', 'layer', 'upload'], function () {
+                    $ = layui.jquery;
+                    var form = layui.form
+                        , layer = layui.layer
+                        , upload = layui.upload;
+
+                    //普通LOGO上传
+                    layui.use('upload', function () {
+                        var $ = layui.jquery
+                            , upload = layui.upload;
+
+                        //普通LOGO上传
+                        var uploadInst = upload.render({
+                            elem: '#test1'
+                            , url: 'uploadImg'
+                            , accept: 'images'
+                            , size: 50000
+                            , before: function (obj) {
+
+                                obj.preview(function (index, file, result) {
+                                    $('#imgname').attr('src', result);
+                                });
+                            }
+                            , done: function (res) {
+                                //如果上传失败
+                                if (res.code > 0) {
+                                    return layer.msg('上传失败');
+                                }
+                                //上传成功
+                                var demoText = $('#demoText');
+                                demoText.html('<span style="color: #4cae4c;">上传成功</span>');
+                                var fileupload = $(".image");
+                                fileupload.attr("value", res.data.src);
+                                // $("#filename").val(res.data.src)
+                                vmm.about.filename = res.data.src
+                                //console.log(fileupload.attr("value"));
+                                console.log(res.data.src);
+                                img = res.data.src;
+                            }
+                            , error: function () {
+                                //演示失败状态，并实现重传
+                                var demoText = $('#demoText');
+                                demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                                demoText.find('.demo-reload').on('click', function () {
+                                    uploadInst.upload();
+                                });
+                            }
+                        });
+                    });
+                });
+
+
+
+
+
+
+            })
+        },
+        methods: {
+            show(){
+                this.$nextTick(function(){
+                    axios.post('../about/get',qs.stringify({
+                        id:this.about.id,
+                    })).then(response =>{
+                        this.about = response.data.data
+                        $('#imgname').attr('src', "../upload/"+this.about.filename); //LOGO链接（base64）
+                    }).catch(error =>{
+                        console.log(error)
+                    })
+                })
+            },
+            add() {
+                if(this.about.name==""){
+                    layer.msg("名称不能为空",{icon:5})
+                    return false;
+                }
+
+                if(this.about.category==""){
+                    layer.msg("餐馆种类不能为空",{icon:5})
+                    return false;
+                }
+
+                if(this.about.opentime==""){
+                    layer.msg("运营时间不能为空",{icon:5})
+                    return false;
+                }
+
+                if(this.about.tel=="" || !/^[1][3,4,5,6,7,8,9][0-9]{9}$/.test(this.about.tel)){
+                    layer.msg("电话输入错误",{icon:5})
+                    return false;
+                }
+
+                if(this.about.addr==""){
+                    layer.msg("详细地址不能为空",{icon:5})
+                    return false;
+                }
+
+                axios.post('../about/update',qs.stringify({
+                    filename:this.about.filename,
+                    name:this.about.name,
+                    category:this.about.category,
+                    opentime:this.about.opentime,
+                    tel:this.about.tel,
+                    addr:this.about.addr,
+                    id:this.about.id,
+                })).then(response =>{
+                    layer.msg("编辑成功！",{icon:6})
+                }).catch(error =>{
+                    console.log(error)
+                })
+            },
+
+
+
+        }
+    });
+
+    $(document).ready(function () {
+        $('#iframetop').load('top.html');
+        KindEditor.ready(function(K) {
+            window.editor = K.create('#editor_id');
+        });
+
+    });
+
+</script>
+
+</body>
+</html>

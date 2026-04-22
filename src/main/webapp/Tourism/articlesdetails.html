@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <title>非遗文化详情 - 八闽福建</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="../css/element_ui.css"/>
+
+</head>
+<body>
+    <div id="app" v-cloak>
+        <!-- 国风背景图案 -->
+        <div class="chinese-pattern"></div>
+        
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="container header-inner">
+                <div class="logo">
+                    <img src="img/logo.png" alt="福建文旅">
+                    <div class="logo-text">八闽福建</div>
+                </div>
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+                        <li class="nav-item"><a href="food.html" class="nav-link">景点浏览</a></li>
+                        <li class="nav-item"><a href="scenic.html" class="nav-link active">非遗探索</a></li>
+                        <li class="nav-item"><a href="activity.html" class="nav-link">活动资讯</a></li>
+                        <li class="nav-item"><a href="message.html" class="nav-link">留言互动</a></li>
+                        <li class="nav-item"><a href="personal.html" class="nav-link">个人中心</a></li>
+                    </ul>
+                    <div class="menu-toggle">
+                        <i class="el-icon-menu"></i>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content gradient-bg">
+            <div class="container">
+                <div class="page-title fade-in-up">
+                    <h1>景点浏览详情</h1>
+                </div>
+
+                <div class="detail-header">
+                    <h1 class="detail-title">{{articles.name}}</h1>
+                    <div class="detail-meta">
+                        <span class="publish-time"><i class="el-icon-date"></i> 发布时间：{{formatDate(articles.creattime)}}</span>
+                        <div class="action-buttons">
+                            <!-- 收藏和分享按钮（和景点页一致） -->
+                            <span class="favorite-btn-wrapper">
+                <template v-if="isLogin">
+                    <button class="favorite-btn" @click="toggleFavorite" :class="{'is-favorite': isFavorite}">
+                        <i :class="[isFavorite ? 'el-icon-star-on' : 'el-icon-star-off']"></i>
+                        {{isFavorite ? '已收藏' : '收藏'}}
+                    </button>
+                </template>
+                <template v-else>
+                    <div class="custom-tooltip">
+                        <button class="favorite-btn disabled" @click="showLoginTipToggle">
+                            <i class="el-icon-star-off"></i> 收藏
+                        </button>
+                        <div class="tooltip-content" :class="{'show-tooltip': showLoginTip}">
+                            <div class="login-tip-content">
+                                <i class="el-icon-warning-outline warning-icon"></i>
+                                <div class="tip-text">
+                                    <p>请先登录后再收藏</p>
+                                    <a href="personal.html" class="login-link">立即登录</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </span>
+                            <div class="custom-dropdown">
+                                <button class="share-btn" @click="toggleShareMenu">
+                                    <i class="el-icon-share"></i> 分享
+                                </button>
+                                <div class="custom-dropdown-content" :class="{'show-dropdown': showShareMenu}">
+                                    <div class="dropdown-item" @click="copyLink">
+                                        <i class="el-icon-link"></i> 复制链接
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                    <div class="detail-img-container">
+                        <div class="detail-img float-element">
+                            <img :src="articles.filename" alt="景点浏览图片" @error="handleImageError">
+                        </div>
+                    </div>
+                    
+                    <div class="detail-content">
+                        <div v-html="articles.content"></div>
+                    </div>
+                </div>
+                
+                <!-- 评论区域 -->
+                <div class="comments-section fade-in-up">
+                    <h2 class="comments-title">发表评论</h2>
+                    
+                    <!-- 发表评论 -->
+                    <div class="message-form">
+                        <div v-if="!isLogin" class="login-tip">
+                            <el-alert
+                                title="请先登录后再发表评论"
+                                type="warning"
+                                :closable="false"
+                                show-icon>
+                                <template slot="title">
+                                    请先<a href="personal.html" class="login-link">登录</a>后再发表评论
+                                </template>
+                            </el-alert>
+                        </div>
+                        <div v-else>
+                            <div class="form-group">
+                                <label class="form-label">评论内容</label>
+                                <textarea class="form-control" v-model="content" rows="5" placeholder="请输入您的评论..."></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <el-button type="primary" @click="commentadd" :loading="submitting">提交评论</el-button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h2 class="comments-title comments-list-title">游客评论 ({{commentlist.length}})</h2>
+                    
+                    <div v-if="commentlist.length == 0" class="no-comments">
+                        <p>暂无评论，快来发表您的看法吧！</p>
+                    </div>
+                    
+                    <div v-else class="comment-list">
+                        <div class="comment-item" v-for="comment in commentlist">
+                            <div class="comment-header">
+                                <div class="comment-avatar">
+                                    <img :src="['/upload/'+comment.member.filename]" alt="用户头像" @error="handleImageError">
+                                </div>
+                                <div class="comment-info">
+                                    <div class="comment-author">{{comment.member.tname}}</div>
+                                    <div class="comment-time">{{formatDate(comment.savetime)}}</div>
+                                </div>
+                            </div>
+                            <div class="comment-content">
+                                {{comment.content}}
+                            </div>
+                            <div class="comment-reply" v-if="comment.hfcontent">
+                                <div class="reply-header">管理员回复：</div>
+                                <div class="reply-content">{{comment.hfcontent}}</div>
+                                <div class="reply-time" v-if="comment.hftime">{{formatDate(comment.hftime)}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 相关推荐 -->
+                <div class="related-section fade-in-up">
+                    <h2 class="related-title">相关非遗文化推荐</h2>
+                    <div class="row">
+                        <div class="col-4" v-for="(item, index) in relatedArticles" v-if="index < 3">
+                            <div class="card pulse-element">
+                                <img :src="item.filename" class="card-img" alt="相关景点浏览" @error="handleImageError">
+                                <div class="card-content">
+                                    <h3 class="card-title">{{item.title}}</h3>
+                                    <p class="card-text" v-html="getTruncatedContent(item.content, 95)"></p>
+                                    <a :href="['articlesdetails.html?id='+item.id]" class="card-link">查看详情</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-column">
+                        <h3 class="footer-title">关于我们</h3>
+                        <p class="footer-text">八闽福建深耕本土文旅资源，积极推广闽越文化、特色美食与山海风光，为广大游客提供全方位、高品质的福建旅游信息服务</p>
+                    </div>
+                    <div class="footer-column">
+                        <h3 class="footer-title">联系方式</h3>
+                        <p class="footer-text">地址：福建省厦门市翔安区</p>
+                        <p class="footer-text">电话：17262016429</p>
+                        <p class="footer-text">邮箱：997463290@qq.com</p>
+                    </div>
+                    <div class="footer-column">
+                        <h3 class="footer-title">快速链接</h3>
+                        <ul class="footer-links">
+                            <li class="footer-link"><a href="index.html">首页</a></li>
+                            <li class="footer-link"><a href="food.html">景点浏览</a></li>
+                            <li class="footer-link"><a href="scenic.html">非遗探索</a></li>
+                            <li class="footer-link"><a href="activity.html">活动资讯</a></li>
+                            <li class="footer-link"><a href="message.html">留言互动</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; Copyright &copy; {{ currentYear }} 八闽福建 <a target="_blank" href="/adminPage/login.html">后台管理</a></p>
+                    <a class="to-top-link"><img src="img/to-top.png" class="to-top" alt="回到顶部"/></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script src="../js/axios/vue.js"></script>
+    <script src="../js/axios/axios.min.js"></script>
+    <script src="../js/axios/qs.js"></script>
+    <script src="../js/axios/getUrlParams.js"></script>
+    <script src="../js/jquery/jquery-3.2.1.min.js"></script>
+    <script src="../js/layer/layer.js"></script>
+    <script src="../js/layui/layui.js"></script> -->
+    <script src="../js/axios/element_ui.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        var qs = Qs
+        var id = UrlParam.paramValues("id").toString()
+        var vmm = new Vue({
+            el: "#app",
+            data: {
+                currentYear: new Date().getFullYear(),
+                articles: {
+                    id: id,
+                    title: "",
+                    filename: "",
+                    content: "",
+                    savetime: ""
+                },
+                score: 5,
+                content: "",
+                commentlist: [],
+                relatedArticles: [],
+                submitting: false,
+                isLogin: false,
+                isFavorite: false, // 是否已收藏
+                showShareMenu: false, // 是否显示分享菜单
+                showLoginTip: false // 是否显示登录提示
+            },
+            mounted() {
+                this.show()
+                this.getRelatedArticles()
+                this.checkLogin()
+            },
+            methods: {
+                show() {
+                    axios.post('/articles/show', qs.stringify({
+                        id: this.articles.id,
+                    })).then(response => {
+                        this.articles = response.data.articles
+                        this.getcommentlist()
+                        // 如果用户已登录，检查是否已收藏
+                        if (this.isLogin) {
+                            this.checkFavoriteStatus()
+                        }
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                },
+                getcommentlist() {
+                    axios.post('/admin/commentList', qs.stringify({
+                        articlesid: this.articles.id,
+                    })).then(response => {
+                        this.commentlist = response.data.list
+                        console.log("评论列表已更新", this.commentlist);
+                    }).catch(error => {
+                        console.log(error);
+                        this.$message.error("获取评论列表失败");
+                    })
+                },
+                commentadd() {
+                    if (!this.isLogin) {
+                        this.$message.error("请先登录");
+                        setTimeout(function() {
+                            window.location.href = "personal.html"
+                        }, 1500)
+                        return;
+                    }
+
+                    if (this.content == "") {
+                        this.$message.warning("评论内容不能为空");
+                        return false;
+                    }
+                    
+                    this.submitting = true;
+                    axios.post('/commentAdd', qs.stringify({
+                        articlesid: this.articles.id,
+                        content: this.content,
+                        score: this.score,
+                    })).then(response => {
+                        this.$message.success("评论成功！");
+                        this.content = "";
+                        this.getcommentlist();
+                        this.submitting = false;
+                    }).catch(error => {
+                        console.log(error);
+                        this.$message.error("评论失败，请稍后重试");
+                        this.submitting = false;
+                    })
+                },
+                getRelatedArticles() {
+                    axios.post('/articles/list', qs.stringify({
+                        pageNum: 1,
+                        pageSize: 4
+                    })).then(response => {
+                        this.relatedArticles = response.data.list.filter(item => item.id != this.articles.id)
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                },
+                //截取内容
+                getTruncatedContent(content, length) {
+                    if (!content) return '';
+                    // 移除HTML标签
+                    let plainText = content.replace(/<[^>]+>/g, '');
+                    if (plainText.length <= length) return plainText;
+                    return plainText.substring(0, length) + '...';
+                },
+                //格式化日期
+                formatDate(timestamp) {
+                    if (!timestamp) return '';
+                    
+                    // 检查timestamp是否为字符串，如果是则尝试转换
+                    if (typeof timestamp === 'string') {
+                        // 如果是日期字符串格式(如：2023-01-01 12:00:00)，直接返回
+                        if (timestamp.includes('-')) {
+                            return timestamp;
+                        }
+                        // 尝试将字符串转为数字
+                        timestamp = Number(timestamp);
+                    }
+                    
+                    // 检查timestamp是否为有效数字
+                    if (isNaN(timestamp) || timestamp <= 0) {
+                        return '未知时间';
+                    }
+                    
+                    // 检查时间戳长度，如果是10位（秒），则转为13位（毫秒）
+                    if (timestamp.toString().length === 10) {
+                        timestamp = timestamp * 1000;
+                    }
+                    
+                    const date = new Date(timestamp);
+                    
+                    // 检查日期是否有效
+                    if (date.getFullYear() < 2000) {
+                        return '未知时间';
+                    }
+                    
+                    return date.getFullYear() + '-' + 
+                           (date.getMonth() + 1).toString().padStart(2, '0') + '-' + 
+                           date.getDate().toString().padStart(2, '0') + ' ' +
+                           date.getHours().toString().padStart(2, '0') + ':' +
+                           date.getMinutes().toString().padStart(2, '0');
+                },
+                // 检查用户是否已登录
+                checkLogin() {
+                    this.isLogin = sessionStorage.getItem("uname") != null;
+                    axios.post('/checkmember').then(response => {
+                        if (response.data.code === 200) {
+                            this.isLogin = true;
+                            // 登录状态下检查是否已收藏
+                            this.checkFavoriteStatus();
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                    });
+                },
+                // 检查当前景点浏览是否已被收藏
+                checkFavoriteStatus() {
+                    axios.post('/frontfavList').then(response => {
+                        if (response.data && response.data.list) {
+                            // 查找当前景点浏览是否在收藏列表中
+                            const found = response.data.list.find(item => 
+                                item.articlesid == this.articles.id
+                            );
+                            this.isFavorite = !!found;
+                        }
+                    }).catch(error => {
+                        console.log('获取收藏状态失败:', error);
+                    });
+                },
+                // 切换收藏状态
+                toggleFavorite() {
+                    if (!this.isLogin) {
+                        this.$message.warning('请先登录后再收藏');
+                        setTimeout(() => {
+                            window.location.href = 'personal.html';
+                        }, 1500);
+                        return;
+                    }
+                    
+                    if (this.isFavorite) {
+                        // 已收藏状态，执行取消收藏
+                        this.removeFavorite();
+                    } else {
+                        // 未收藏状态，执行添加收藏
+                        this.addFavorite();
+                    }
+                },
+                // 添加收藏
+                addFavorite() {
+                    axios.post('/favAdd', qs.stringify({
+                        articlesid: this.articles.id
+                    })).then(response => {
+                        if (response.data.data === 200) {
+                            this.$message.success('已加入收藏夹');
+                            this.isFavorite = true;
+                        } else if (response.data.data === 400) {
+                            this.$message.warning('您已收藏过该景点浏览');
+                            this.isFavorite = true;
+                        } else {
+                            this.$message.error('收藏失败，请稍后重试');
+                        }
+                    }).catch(error => {
+                        console.log('收藏失败:', error);
+                        this.$message.error('收藏失败，请稍后重试');
+                    });
+                },
+                // 取消收藏
+                removeFavorite() {
+                    // 先获取收藏列表找到对应ID
+                    axios.post('/frontfavList').then(response => {
+                        if (response.data && response.data.list) {
+                            const favorite = response.data.list.find(item => 
+                                item.articlesid == this.articles.id
+                            );
+                            
+                            if (favorite) {
+                                // 找到收藏记录，执行删除
+                                axios.post('/favDel', qs.stringify({
+                                    id: favorite.id
+                                })).then(res => {
+                                    this.$message.success('已移除收藏夹');
+                                    this.isFavorite = false;
+                                }).catch(err => {
+                                    console.log('取消收藏失败:', err);
+                                    this.$message.error('取消收藏失败，请稍后重试');
+                                });
+                            }
+                        }
+                    }).catch(error => {
+                        console.log('获取收藏记录失败:', error);
+                        this.$message.error('操作失败，请稍后重试');
+                    });
+                },
+                toggleShareMenu() {
+                    this.showShareMenu = !this.showShareMenu;
+                    if(this.showShareMenu) {
+                        // 添加点击外部关闭下拉菜单的事件
+                        setTimeout(() => {
+                            document.addEventListener('click', this.closeShareMenu);
+                        }, 0);
+                    } else {
+                        document.removeEventListener('click', this.closeShareMenu);
+                    }
+                },
+                closeShareMenu(e) {
+                    if(!this.$el.querySelector('.custom-dropdown').contains(e.target)) {
+                        this.showShareMenu = false;
+                        document.removeEventListener('click', this.closeShareMenu);
+                    }
+                },
+                showLoginTipToggle() {
+                    this.showLoginTip = !this.showLoginTip;
+                    if(this.showLoginTip) {
+                        // 添加点击外部关闭提示的事件
+                        setTimeout(() => {
+                            document.addEventListener('click', this.closeLoginTip);
+                        }, 0);
+                    } else {
+                        document.removeEventListener('click', this.closeLoginTip);
+                    }
+                },
+                closeLoginTip(e) {
+                    if(!this.$el.querySelector('.custom-tooltip').contains(e.target)) {
+                        this.showLoginTip = false;
+                        document.removeEventListener('click', this.closeLoginTip);
+                    }
+                },
+                copyLink() {
+                    const url = window.location.href;
+                    const tempInput = document.createElement('input');
+                    tempInput.value = url;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    
+                    // 使用Element UI的消息提示
+                    this.$message({
+                        message: '链接已复制到剪贴板',
+                        type: 'success',
+                        duration: 2000,
+                        offset: 60
+                    });
+                    
+                    this.showShareMenu = false;
+                },
+                // 处理图片加载错误
+                handleImageError(e) {
+                    e.target.src = 'img/default-avatar.png';
+                }
+            }
+        })
+    </script>
+
+    <style>
+        /* 评论区样式优化 */
+        .comments-section {
+            margin-top: 40px;
+            background-color: #fff;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .comments-title {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        .comments-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--primary-color);
+        }
+        
+        .comments-list-title {
+            margin-top: 40px;
+            border-top: 1px dashed #eee;
+            padding-top: 30px;
+        }
+        
+        .message-form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(139, 35, 35, 0.1);
+            outline: none;
+        }
+        
+        .form-actions {
+            text-align: right;
+        }
+        
+        .comment-list {
+            margin-top: 20px;
+        }
+        
+        .comment-item {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .comment-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .comment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .comment-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 15px;
+            border: 2px solid var(--primary-color);
+        }
+        
+        .comment-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .comment-info {
+            flex: 1;
+        }
+        
+        .comment-author {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 3px;
+        }
+        
+        .comment-time {
+            color: #999;
+            font-size: 13px;
+        }
+        
+        .comment-content {
+            line-height: 1.6;
+            color: #444;
+            margin-bottom: 15px;
+            padding-left: 65px;
+        }
+        
+        .comment-reply {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-left: 65px;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .reply-header {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        
+        .reply-content {
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .reply-time {
+            color: #999;
+            font-size: 12px;
+            text-align: right;
+            margin-top: 8px;
+        }
+        
+        .no-comments {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+            font-style: italic;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        /* 收藏按钮样式 */
+        .favorite-btn-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .favorite-btn {
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(139, 35, 35, 0.1);
+        }
+        
+        .favorite-btn:hover {
+            background-color: rgba(139, 35, 35, 0.05);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(139, 35, 35, 0.15);
+        }
+        
+        .favorite-btn.is-favorite {
+            background-color: var(--primary-color);
+            color: white;
+            animation: pulse 1.5s;
+        }
+        
+        .favorite-btn.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            border-color: #ccc;
+            color: #999;
+            box-shadow: none;
+        }
+        
+        .favorite-btn i {
+            font-size: 18px;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(139, 35, 35, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(139, 35, 35, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(139, 35, 35, 0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .detail-title {
+                font-size: 24px;
+            }
+            
+            .detail-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .favorite-btn-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+            
+            .favorite-btn {
+                width: 100%;
+            }
+            
+            .detail-container {
+                padding: 20px;
+            }
+        }
+        
+        /* 详情区样式优化 */
+        .detail-container {
+            background-color: #fff;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            padding: 35px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .detail-header {
+            margin-bottom: 25px;
+            position: relative;
+            border-bottom: 1px dashed rgba(139, 35, 35, 0.2);
+            padding-bottom: 20px;
+        }
+        
+        .detail-title {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            line-height: 1.3;
+        }
+        
+        .detail-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .publish-time {
+            color: #666;
+            font-size: 15px;
+            background-color: rgba(139, 35, 35, 0.05);
+            padding: 6px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .publish-time i {
+            margin-right: 5px;
+            color: var(--primary-color);
+        }
+        
+        .detail-img-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .detail-img {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: transform 0.5s ease;
+        }
+        
+        .detail-img:hover {
+            transform: translateY(-5px);
+        }
+        
+        .detail-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.8s ease;
+        }
+        
+        .detail-img:hover img {
+            transform: scale(1.05);
+        }
+        
+        .detail-content {
+            line-height: 1.8;
+            color: #333;
+            font-size: 16px;
+            padding-top: 20px;
+        }
+        
+        /* 自定义提示框样式 */
+        .custom-tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip-content {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background-color: #fff;
+            min-width: 220px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+            transform: translateY(10px);
+        }
+        
+        .tooltip-content.show-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .tooltip-content::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #fff;
+        }
+        
+        .tooltip-content::before {
+            content: '';
+            position: absolute;
+            bottom: -11px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .login-tip-content {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: linear-gradient(135deg, #fff6f6, #fff);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .warning-icon {
+            font-size: 24px;
+            color: var(--primary-color);
+            margin-right: 12px;
+        }
+        
+        .tip-text {
+            flex: 1;
+        }
+        
+        .tip-text p {
+            margin: 0 0 8px 0;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .login-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: rgba(139, 35, 35, 0.1);
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .login-link:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+        
+        /* 分享按钮样式优化 */
+        .share-btn {
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(139, 35, 35, 0.1);
+        }
+        
+        .share-btn:hover {
+            background-color: rgba(139, 35, 35, 0.05);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(139, 35, 35, 0.15);
+        }
+        
+        .share-btn i {
+            font-size: 18px;
+        }
+        
+        .custom-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .custom-dropdown-content {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background-color: #fff;
+            min-width: 140px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+            transform: translateY(10px);
+        }
+        
+        .custom-dropdown-content.show-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            color: #606266;
+            font-size: 14px;
+            line-height: 1.5;
+            display: flex;
+            align-items: center;
+        }
+        
+        .dropdown-item i {
+            margin-right: 5px;
+            font-size: 16px;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f5f7fa;
+            color: #c8161d;
+        }
+        
+        /* 消息提示样式 */
+        .el-message {
+            min-width: 300px;
+            padding: 12px 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            border: none;
+        }
+        
+        .el-message--success {
+            background: linear-gradient(to right, #f0f9eb, #fff);
+            border-left: 4px solid #67c23a;
+        }
+        
+        .el-message__content {
+            font-size: 14px;
+            color: #606266;
+        }
+        
+        /* 默认图片样式 */
+        .default-img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .tooltip-content[v-show="true"],
+        .custom-dropdown-content[v-show="true"] {
+            display: none;
+        }
+        
+        /* 确保按钮容器有足够的间距 */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            position: relative;
+        }
+        
+        /* 确保提示框在按钮上方有足够的空间 */
+        .favorite-btn-wrapper,
+        .custom-dropdown {
+            position: relative;
+            padding-top: 15px;
+            margin-left: 5px;
+        }
+        
+        /* 添加新的样式确保弹窗正常工作 */
+        .tooltip-content::after,
+        .custom-dropdown-content::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #fff;
+        }
+        
+        .tooltip-content::before,
+        .custom-dropdown-content::before {
+            content: '';
+            position: absolute;
+            bottom: -11px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</body>
+</html> 

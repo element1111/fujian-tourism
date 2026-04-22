@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>八闽福建后台管理系统</title>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="description" content="八闽福建后台管理系统">
+    <meta name="keywords" content="福建,文旅,管理系统">
+    <meta name="author" content="">
+    <meta name="MobileOptimized" content="320">
+
+    <!-- 网站图标 -->
+    <link rel="shortcut icon" type="image/png" href="../Tourism/img/logo.png">
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" type="text/css" href="assets/css/template-admin.css">
+    <style>
+        /* 禁止页面滚动 */
+        html, body {
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* 主体容器样式优化 */
+        .kf-admin-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+        }
+        
+        /* 侧边栏样式优化 */
+        .kf-sidebar {
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            /* 隐藏滚动条但保留功能 */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        /* 隐藏Webkit浏览器的滚动条 */
+        .kf-sidebar::-webkit-scrollbar {
+            width: 0;
+            display: none;
+        }
+        
+        /* 主内容区样式优化 */
+        .kf-main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        /* 顶部导航样式优化 */
+        .kf-header {
+            flex-shrink: 0;
+            z-index: 10;
+            overflow: hidden;
+        }
+        
+        /* 顶部导航内部iframe样式 */
+        .kf-header iframe {
+            width: 100%;
+            height: 60px;
+            border: none;
+            overflow: hidden;
+        }
+        
+        /* iframe容器样式优化 */
+        .kf-iframe-container {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: calc(100% - 60px); /* 减去顶部导航高度 */
+            overflow: hidden;
+        }
+        
+        /* iframe样式优化 */
+        .kf-iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        /* 全局加载动画样式 */
+        .kf-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* 内容区加载动画样式 */
+        .kf-content-loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            z-index: 1000;
+            display: none; /* 默认隐藏 */
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* 加载动画旋转器样式 */
+        .kf-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #c8161d;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 加载动画 -->
+    <div class="kf-loader">
+        <div class="kf-spinner"></div>
+    </div>
+
+    <!-- 主体容器 -->
+    <div class="kf-admin-container">
+        <!-- 侧边栏 -->
+        <aside class="kf-sidebar" id="kf-sidebar">
+            <div id="iframeleft"></div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <div class="kf-main-content" id="kf-main-content">
+            <!-- 顶部导航 -->
+            <header class="kf-header">
+                <iframe src="top.html" frameborder="0" scrolling="no" width="100%" height="100%" id="topFrame"></iframe>
+            </header>
+
+            <!-- iframe容器 -->
+            <div class="kf-iframe-container">
+                <!-- 内容区加载动画 -->
+                <div class="kf-content-loader">
+                    <div class="kf-spinner"></div>
+                </div>
+                <iframe id="iframe0" class="kf-iframe" scrolling="auto" frameborder="0" src="main.html"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入脚本文件 -->
+    <script src="assets/js/template-admin.js"></script>
+    <script type="text/javascript">
+        // 初始化qs变量
+        var qs = Qs;
+        
+        // 确保ELEMENT对象可以全局访问
+        window.ELEMENT = ELEMENT;
+        
+        // 创建全局Vue实例，用于显示弹窗
+        window.Vue = Vue;
+        new Vue({
+            el: '.kf-admin-container',
+            data: {
+                // 全局数据
+            },
+            methods: {
+                // 全局方法
+            }
+        });
+        
+        // 检查用户登录状态
+        function checkLoginStatus() {
+            axios.post('/admin/checkadmin', qs.stringify({}))
+                .then(response => {
+                    if (response.data.data == 400 || !response.data.admin) {
+                        console.log('用户未登录或登录状态已失效，跳转到登录页');
+                        location.replace("login.html");
+                    } else {
+                        console.log('用户已登录:', response.data.admin.realname);
+                    }
+                })
+                .catch(error => {
+                    console.error('检查登录状态出错:', error);
+                    // 出错时也跳转到登录页，确保安全
+                    location.replace("login.html");
+                });
+        }
+        
+        // 定期检查登录状态（每5分钟检查一次）
+        setInterval(checkLoginStatus, 5 * 60 * 1000);
+        
+        // 全局退出登录函数
+        window.logoutSystem = function() {
+            ELEMENT.MessageBox.confirm('确认退出系统吗?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                // 用户点击了"确定"按钮
+                axios.post('/admin/logout', qs.stringify({}))
+                    .then(response => {
+                        // 退出成功，跳转到登录页
+                        location.replace("login.html");
+                    })
+                    .catch(error => {
+                        console.log('退出请求出错:', error);
+                        // 即使请求失败，仍然跳转到登录页
+                        location.replace("login.html");
+                    });
+            }).catch(() => {
+                // 用户点击了"取消"按钮
+                ELEMENT.Message.info('已取消退出');
+            });
+        };
+        
+        // 添加事件监听器，监听来自iframe的退出登录请求
+        window.addEventListener('message', function(event) {
+            console.log('收到消息:', event.data);
+            
+            // 确保消息来源安全
+            if (event.origin !== window.location.origin) {
+                console.warn('收到来自不安全来源的消息:', event.origin);
+                return;
+            }
+            
+            // 处理退出登录请求
+            if (event.data && event.data.action === 'logout') {
+                console.log('处理退出登录请求');
+                window.logoutSystem();
+            }
+        });
+        
+        // 监听页面可见性变化，当用户切换回页面时检查登录状态
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                console.log('用户切换回页面，检查登录状态');
+                checkLoginStatus();
+            }
+        });
+        
+        // 监听页面重新获得焦点时检查登录状态
+        window.addEventListener('focus', function() {
+            console.log('页面获得焦点，检查登录状态');
+            checkLoginStatus();
+        });
+        
+        window.onload = function () {
+            // 立即检查登录状态
+            checkLoginStatus();
+            
+            // 加载左侧菜单
+            $('#iframeleft').load('left.html');
+            
+            // 隐藏全局加载动画
+            setTimeout(function() {
+                document.querySelector('.kf-loader').style.display = 'none';
+            }, 800);
+            
+            // 初始化布局
+            adjustLayout();
+        }
+        
+        // 调整布局函数
+        function adjustLayout() {
+            const windowHeight = window.innerHeight;
+            const headerHeight = 60; // 顶部导航高度
+            
+            // 设置iframe容器高度
+            const iframeContainer = document.querySelector('.kf-iframe-container');
+            iframeContainer.style.height = (windowHeight - headerHeight) + 'px';
+            
+            // 设置iframe高度
+            const iframe = document.getElementById('iframe0');
+            iframe.style.height = '100%';
+            
+            // 设置侧边栏高度
+            const sidebar = document.getElementById('kf-sidebar');
+            sidebar.style.height = windowHeight + 'px';
+        }
+
+        // 监听窗口大小变化
+        window.addEventListener('resize', adjustLayout);
+
+        // 侧边栏切换函数
+        function toggleSidebar() {
+            const sidebar = document.getElementById('kf-sidebar');
+            const mainContent = document.getElementById('kf-main-content');
+            
+            sidebar.classList.toggle('kf-sidebar-collapsed');
+            mainContent.classList.toggle('kf-main-content-expanded');
+            
+            // 触发自定义事件，通知Vue组件
+            const event = new CustomEvent('sidebarToggle', {
+                detail: { collapsed: sidebar.classList.contains('kf-sidebar-collapsed') }
+            });
+            window.dispatchEvent(event);
+            
+            // 保存状态到本地存储
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('kf-sidebar-collapsed'));
+        }
+        
+        // 从本地存储恢复侧边栏状态
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedState = localStorage.getItem('sidebarCollapsed');
+            if (savedState === 'true') {
+                const sidebar = document.getElementById('kf-sidebar');
+                const mainContent = document.getElementById('kf-main-content');
+                
+                sidebar.classList.add('kf-sidebar-collapsed');
+                mainContent.classList.add('kf-main-content-expanded');
+            }
+            
+            // 初始化布局
+            adjustLayout();
+        });
+        
+        // 切换iframe页面的函数
+        function changeIframePage(url) {
+            // 检查登录状态
+            checkLoginStatus();
+            
+            const iframe = document.getElementById('iframe0');
+            
+            // 显示内容区加载动画
+            document.querySelector('.kf-content-loader').style.display = 'flex';
+            
+            iframe.onload = function() {
+                // 页面加载完成后隐藏内容区加载动画
+                document.querySelector('.kf-content-loader').style.display = 'none';
+                // 清除onload事件，避免重复触发
+                this.onload = null;
+            };
+            
+            iframe.src = url;
+        }
+    </script>
+</body>
+</html>

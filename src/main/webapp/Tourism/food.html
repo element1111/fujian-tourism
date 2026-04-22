@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <title>景点浏览 - 八闽福建</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="../css/element_ui.css"/>
+</head>
+<body>
+    <div id="app" v-cloak>
+        <!-- 国风背景图案 -->
+        <div class="chinese-pattern"></div>
+        
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="container header-inner">
+                <div class="logo" style="display: flex; align-items: center; position: relative; z-index: 1001;">
+                    <img src="img/logo.png" alt="福建文旅" style="height: 50px; display: block;">
+                    <div class="logo-text" style="display: block; position: relative; z-index: 2;">八闽福建</div>
+                </div>
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+                        <li class="nav-item"><a href="food.html" class="nav-link active">景点浏览</a></li>
+                        <li class="nav-item"><a href="scenic.html" class="nav-link">非遗探索</a></li>
+                        <li class="nav-item"><a href="activity.html" class="nav-link">活动资讯</a></li>
+                        <li class="nav-item"><a href="message.html" class="nav-link">留言互动</a></li>
+                        <li class="nav-item"><a href="personal.html" class="nav-link">个人中心</a></li>
+                    </ul>
+                    <div class="menu-toggle">
+                        <i class="el-icon-menu"></i>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="container">
+                <div class="page-title">
+                    <h1>福建景点一览</h1>
+                </div>
+                
+                <!-- 搜索框 -->
+                <div class="search-box">
+                    <div class="corner-tl"></div>
+                    <div class="corner-tr"></div>
+                    <div class="corner-bl"></div>
+                    <div class="corner-br"></div>
+                    <input type="text" class="search-input" v-model="key" placeholder="输入景点名称搜索...">
+                    <button class="search-btn" @click="getpaintinglist()">
+                        <i class="el-icon-search"></i> 搜索
+                    </button>
+                </div>
+                
+                <!-- 分类筛选 -->
+                <div class="filter-container">
+                    <div class="dashed-border"></div>
+                    <div class="ink-decoration"></div>
+                    <div class="filter-label">城市详情</div>
+                    <div class="filter-item" :class="{active: activeCategory === ''}" @click="filterByCategory('')">全部</div>
+                    <div class="filter-item" v-for="category in categorylist" :key="category.id" 
+                         :class="{active: activeCategory === category.name}" 
+                         @click="filterByCategory(category.name)">
+                        {{category.name}}
+                    </div>
+                </div>
+                
+                <!-- 美食列表 -->
+                <div class="row food-grid">
+                    <div class="col-4" v-for="painting in paintinglist">
+                        <div class="food-card">
+                            <div class="food-card-image">
+                                <img
+                                        :src="painting.filename"
+                                        alt="景点图片"
+                                >
+                                <div class="food-card-overlay">
+                                    <a :href="['paintingdetails.html?id='+painting.id]" class="view-details-btn">
+                                        <i class="el-icon-view"></i>
+                                        查看详情
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="food-card-content">
+                                <h3 class="food-title">{{painting.name}}</h3>
+                                <div class="food-category" v-if="painting.categoryname">
+                                    <i class="el-icon-collection-tag"></i>
+                                    {{painting.categoryname}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 分页 -->
+                <div id="demo1" class="pagination"></div>
+            </div>
+        </main>
+        
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-column">
+                        <h3 class="footer-title">关于我们</h3>
+                        <p class="footer-text">八闽福建深耕本土文旅资源，积极推广闽越文化、特色美食与山海风光，为广大游客提供全方位、高品质的福建旅游信息服务</p>
+                    </div>
+                    <div class="footer-column">
+                        <h3 class="footer-title">联系方式</h3>
+                        <p class="footer-text">地址：福建省厦门市翔安区</p>
+                        <p class="footer-text">电话：17262016429</p>
+                        <p class="footer-text">邮箱：997463290@qq.com</p>
+                    </div>
+                    <div class="footer-column">
+                        <h3 class="footer-title">快速链接</h3>
+                        <ul class="footer-links">
+                            <li class="footer-link"><a href="index.html">首页</a></li>
+                            <li class="footer-link"><a href="food.html">景点浏览</a></li>
+                            <li class="footer-link"><a href="scenic.html">非遗探索</a></li>
+                            <li class="footer-link"><a href="activity.html">活动资讯</a></li>
+                            <li class="footer-link"><a href="message.html">留言互动</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; Copyright &copy; {{ currentYear }} 八闽福建 <a target="_blank" href="/adminPage/login.html">后台管理</a></p>
+                    <a class="to-top-link"><img src="img/to-top.png" class="to-top" alt="回到顶部"/></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script src="../js/axios/vue.js"></script>
+    <script src="../js/axios/axios.min.js"></script>
+    <script src="../js/axios/qs.js"></script>
+    <script src="../js/axios/getUrlParams.js"></script>
+    <script src="../js/jquery/jquery-3.2.1.min.js"></script>
+    <script src="../js/layer/layer.js"></script>
+    <script src="../js/layui/layui.js"></script>
+    <script src="../js/axios/element_ui.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        var qs = Qs
+        var pageNum = UrlParam.paramValues("pageNum") == null ? 1 : UrlParam.paramValues("pageNum").toString()
+        var vmm = new Vue({
+            el: "#app",
+            data: {
+                currentYear: new Date().getFullYear(),
+                paintinglist: [],
+                categorylist: [],
+                key: "",
+                key1: "",
+                activeCategory: "",
+
+                pageNum: pageNum,
+                pageSize: 9,
+            },
+            mounted() {
+                this.getpaintinglist()
+                this.getcategorylist()
+            },
+            methods: {
+                getcategorylist() {
+                    axios.post('/category/list', qs.stringify({})).then(response => {
+                        this.categorylist = response.data.list
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                },
+                getpaintinglist(key1) {
+                    if (key1) this.key1 = key1
+                    axios.post('/painting/list', qs.stringify({
+                        key: this.key,
+                        key1: this.activeCategory || this.key1,
+                        isshow: "yes",
+                        pageSize: this.pageSize
+                    })).then(response => {
+                        layui.use(['laypage', 'layer'], function () {
+                            var laypage = layui.laypage
+                                , layer = layui.layer;
+                            //总页数大于页码总数
+                            laypage.render({
+                                elem: 'demo1'
+                                , theme: "#8B2323"
+                                , curr: vmm.pageNum
+                                , limit: vmm.pageSize
+                                , count: response.data.list.length //数据总数
+                                , jump: function (obj, first) {
+                                    vmm.pageNum = obj.curr
+                                    vmm.current_page(obj.curr, vmm.pageSize)
+                                    console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                                }
+                            });
+                        });
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                },
+                current_page(page, pageSize) {
+                    axios.post('/painting/list', qs.stringify({
+                        key: this.key,
+                        key1: this.activeCategory || this.key1,
+                        isshow: "yes",
+                        pageNum: page,
+                        pageSize: pageSize,
+                    })).then(response => {
+                        this.paintinglist = response.data.pageInfo.list
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                },
+                filterByCategory(category) {
+                    this.activeCategory = category;
+                    this.key1 = category;
+                    this.pageNum = 1;
+                    this.getpaintinglist();
+                },
+            }
+        })
+    </script>
+
+    <style>
+        /* 美食列表样式优化 */
+        .food-grid {
+            margin: 0 -15px;
+        }
+        
+        .food-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .food-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .food-card-image {
+            position: relative;
+            padding-top: 75%;
+            overflow: hidden;
+        }
+        
+        .food-card-image img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .food-card:hover .food-card-image img {
+            transform: scale(1.1);
+        }
+        
+        .food-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(139, 35, 35, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .food-card:hover .food-card-overlay {
+            opacity: 1;
+        }
+        
+        .view-details-btn {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: 2px solid #fff;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            transform: translateY(20px);
+        }
+        
+        .food-card:hover .view-details-btn {
+            transform: translateY(0);
+        }
+        
+        .view-details-btn:hover {
+            background: #fff;
+            color: var(--primary-color);
+        }
+        
+        .food-card-content {
+            padding: 20px;
+        }
+        
+        .food-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        
+        .food-category {
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .food-category i {
+            color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .col-4 {
+                width: 100%;
+            }
+            
+            .food-card {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</body>
+</html> 

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>八闽福建后台管理系统</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="assets/css/template-admin.css">
+    <link rel="shortcut icon" type="image/png" href="../Tourism/img/logo.png">
+    <style>
+        /* 重置样式 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: "SimSun", serif;
+            overflow: hidden;
+        }
+        
+        /* 登录页背景 */
+        body {
+            background-color: #f9f6f2;
+            background-image: url('../Tourism/img/lattice-pattern.png'), url('../Tourism/img/福建文旅图片.png');
+            background-repeat: repeat, no-repeat;
+            background-size: 200px, cover;
+            background-position: center;
+            background-blend-mode: overlay;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        /* 登录框样式 */
+        .kf-login-container {
+            width: 420px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #e0d9d0;
+        }
+        
+        /* 装饰元素 */
+        .kf-login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #c8161d, #e8383d);
+        }
+        
+        .kf-login-container::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            right: -50px;
+            width: 150px;
+            height: 150px;
+            background-image: url('../Tourism/img/ink-splash.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.1;
+            transform: rotate(45deg);
+        }
+        
+        /* 标题样式 */
+        .kf-login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .kf-login-title {
+            font-size: 28px;
+            color: #8a1a1a;
+            margin-bottom: 10px;
+            font-family: "KaiTi", serif;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+        
+        .kf-login-subtitle {
+            font-size: 14px;
+            color: #666;
+            font-family: "KaiTi", serif;
+        }
+        
+        .kf-divider {
+            width: 80%;
+            margin: 15px auto;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #c8161d, transparent);
+        }
+        
+        /* 表单样式 */
+        .kf-login-form {
+            margin-top: 20px;
+        }
+        
+        .kf-form-item {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .kf-form-item input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #e0d9d0;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.8);
+            font-size: 15px;
+            color: #333;
+            transition: all 0.3s;
+            box-sizing: border-box;
+            font-family: "SimSun", serif;
+        }
+        
+        .kf-form-item input:focus {
+            border-color: #c8161d;
+            box-shadow: 0 0 0 2px rgba(200, 22, 29, 0.1);
+            outline: none;
+        }
+        
+        .kf-form-item label {
+            position: absolute;
+            left: 15px;
+            top: 12px;
+            color: #999;
+            font-size: 15px;
+            pointer-events: none;
+            transition: all 0.3s;
+        }
+        
+        .kf-form-item input:focus + label,
+        .kf-form-item input:not(:placeholder-shown) + label {
+            top: -10px;
+            left: 10px;
+            font-size: 12px;
+            background-color: white;
+            padding: 0 5px;
+            color: #c8161d;
+        }
+        
+        /* 按钮样式 */
+        .kf-login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #c8161d, #e8383d);
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            font-family: "KaiTi", serif;
+            letter-spacing: 2px;
+            margin-top: 10px;
+        }
+        
+        .kf-login-btn:hover {
+            box-shadow: 0 5px 15px rgba(200, 22, 29, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .kf-login-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s;
+        }
+        
+        .kf-login-btn:hover::after {
+            left: 100%;
+        }
+        
+        /* 底部版权信息 */
+        .kf-login-footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .kf-login-container {
+                width: 90%;
+                padding: 30px 20px;
+            }
+        }
+        
+        /* 错误提示 */
+        .kf-error-tip {
+            color: #c8161d;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .kf-form-item.error input {
+            border-color: #c8161d;
+        }
+        
+        .kf-form-item.error .kf-error-tip {
+            display: block;
+        }
+        
+        /* 装饰图案 */
+        .kf-decoration {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .kf-decoration-1 {
+            top: 20px;
+            left: 20px;
+            background-image: url('../Tourism/img/decoration.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+        
+        .kf-decoration-2 {
+            bottom: 20px;
+            right: 20px;
+            background-image: url('../Tourism/img/decoration.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+<div id="app" v-cloak>
+    <div class="kf-login-container">
+        <!-- 装饰元素 -->
+        <div class="kf-decoration kf-decoration-1"></div>
+        <div class="kf-decoration kf-decoration-2"></div>
+        
+        <!-- 标题区域 -->
+        <div class="kf-login-header">
+            <h1 class="kf-login-title">八闽福建</h1>
+            <div class="kf-divider"></div>
+            <p class="kf-login-subtitle">后台管理系统</p>
+        </div>
+        
+        <!-- 登录表单 -->
+        <div class="kf-login-form">
+            <div class="kf-form-item" :class="{'error': usernameError}">
+                <input type="text" v-model="username" placeholder=" " id="username">
+                <label for="username">账号</label>
+                <div class="kf-error-tip">请输入账号</div>
+            </div>
+            
+            <div class="kf-form-item" :class="{'error': passwordError}">
+                <input type="password" v-model="userpwd" placeholder=" " id="password">
+                <label for="password">密码</label>
+                <div class="kf-error-tip">请输入密码</div>
+            </div>
+            
+            <button class="kf-login-btn" type="button" @click="login()">登录系统</button>
+        </div>
+        
+        <!-- 底部版权 -->
+        <div class="kf-login-footer">
+            <p>© {{ currentYear }} 八闽福建管理系统 版权所有</p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="assets/js/template-admin.js"></script>
+<script type="text/javascript">
+    var qs = Qs
+    var vmm = new Vue({
+        el: "#app",
+        data: {
+            currentYear: new Date().getFullYear(),
+            username: "",
+            userpwd: "",
+            usernameError: false,
+            passwordError: false
+        },
+        methods: {
+            login() {
+                // 重置错误状态
+                this.usernameError = false;
+                this.passwordError = false;
+                
+                // 验证表单
+                if (this.username == "") {
+                    this.usernameError = true;
+                    layer.msg("用户名不能为空", {icon: 5})
+                    return false;
+                }
+                if (this.userpwd == "") {
+                    this.passwordError = true;
+                    layer.msg("密码不能为空", {icon: 5})
+                    return false;
+                }
+
+                axios.post('/admin/Login', qs.stringify({
+                    username: this.username,
+                    userpwd: this.userpwd
+                })).then(response => {
+                    console.log(response.data)
+                    if (response.data.data == 200) {
+                        window.location.replace("index.html")
+                    } else if (response.data.data == 400) {
+                        layer.msg("用户名或密码错误", {icon: 5})
+                        this.username = ""
+                        this.userpwd = ""
+                    } else {
+                        layer.msg("未通过审核", {icon: 5})
+                        this.username = ""
+                        this.userpwd = ""
+                    }
+
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+        }
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>八闽福建 - 活动资讯管理</title>
+    <!-- 网站图标 -->
+    <link rel="shortcut icon" type="image/png" href="../Tourism/img/logo.png">
+    <link rel="stylesheet" href="assets/css/template-admin.css"/>
+</head>
+<body class="list-page">
+
+<div class="kf-page-container" id="app" v-cloak>
+    <!-- 页面标题区域 -->
+    <div class="kf-page-header">
+        <div class="kf-page-title">
+            <h2>活动资讯管理</h2>
+        </div>
+        <div class="kf-search-area">
+            <div class="kf-search-box">
+                <input class="kf-search-input" v-model="key" type="text" placeholder="请输入标题搜索..." id="text-input">
+            </div>
+            <button class="kf-btn kf-btn-icon" @click="getaddresslist()">
+                <i class="el-icon-search"></i>
+            </button>
+            <button class="kf-btn" @click="showAddDialog">
+                <i class="el-icon-plus"></i> 新增活动
+            </button>
+        </div>
+    </div>
+    
+    <!-- 内容卡片 -->
+    <div class="kf-card">
+        <div class="kf-card-header">
+            <h3>活动资讯列表</h3>
+        </div>
+        <div class="kf-card-body">
+            <div class="kf-table-container">
+                <div class="kf-table-responsive">
+                    <el-table :data="addresslist" border style="width: 100%">
+                        <el-table-column prop="title" label="标题" align="center"></el-table-column>
+                        <el-table-column label="活动图片" align="center">
+                            <template slot-scope="scope">
+                                <img :src="['../upload/'+scope.row.filename]" class="kf-image" style="width: 200px; height: 132px">
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="发布时间" align="center" width="135px">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{scope.row.savetime}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" align="center" width="240">
+                            <template slot-scope="scope">
+                                <el-button @click="handleEdit(scope.row)" type="text" size="small">
+                                    <i class="el-icon-edit"></i> 修改
+                                </el-button>
+                                <el-button @click="del(scope.row.id)" type="text" size="small">
+                                    <i class="el-icon-delete"></i> 删除
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <!-- 分页区域 -->
+            <div class="kf-pagination" id="demo1"></div>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <div class="kf-footer">
+        <p>八闽福建 © {{ currentYear }} 版权所有</p>
+    </div>
+    
+    <!-- 新增活动弹窗 -->
+    <el-dialog
+        title="新增活动资讯"
+        :visible.sync="addDialogVisible"
+        width="60%"
+        :before-close="handleClose"
+        custom-class="kf-dialog">
+        <div class="kf-form-container">
+            <el-form :model="newAddress" label-width="80px" class="kf-form">
+                <el-form-item label="活动图片">
+                    <el-upload
+                        ref="upload"
+                        action=""
+                        list-type="picture-card"
+                        :on-preview="handlePictureCardPreview"
+                        :on-remove="handleRemove"
+                        :on-change="UploadImage"
+                        :file-list="fileList"
+                        :limit="1"
+                        multiple
+                        :class="{disabled:uploadDisabled}"
+                        :auto-upload="false">
+                        <i class="el-icon-plus"></i>
+                    </el-upload>
+                    <el-dialog :visible.sync="dialogVisible">
+                        <img width="100%" :src="dialogImageUrl" alt="图片扩大"/>
+                    </el-dialog>
+                </el-form-item>
+                
+                <el-form-item label="标题">
+                    <el-input v-model="newAddress.title" placeholder="请输入活动标题"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="内容">
+                    <el-input v-model="newAddress.content" type="textarea" :rows="6" placeholder="请输入活动内容"></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="addDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addAddress">确 定</el-button>
+        </span>
+    </el-dialog>
+    
+    <!-- 修改活动弹窗 -->
+    <el-dialog
+        title="修改活动资讯"
+        :visible.sync="editDialogVisible"
+        width="60%"
+        :before-close="handleClose"
+        custom-class="kf-dialog">
+        <div class="kf-form-container">
+            <el-form :model="editAddress" label-width="80px" class="kf-form">
+                <el-form-item label="活动图片">
+                    <el-upload
+                        ref="editUpload"
+                        action=""
+                        list-type="picture-card"
+                        :on-preview="handlePictureCardPreview"
+                        :on-remove="handleRemove"
+                        :on-change="UploadEditImage"
+                        :file-list="editFileList"
+                        :limit="1"
+                        multiple
+                        :class="{disabled:editUploadDisabled}"
+                        :auto-upload="false">
+                        <i class="el-icon-plus"></i>
+                    </el-upload>
+                    <el-dialog :visible.sync="dialogVisible">
+                        <img width="100%" :src="dialogImageUrl" alt="图片扩大"/>
+                    </el-dialog>
+                </el-form-item>
+                
+                <el-form-item label="标题">
+                    <el-input v-model="editAddress.title" placeholder="请输入活动标题"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="内容">
+                    <el-input v-model="editAddress.content" type="textarea" :rows="6" placeholder="请输入活动内容"></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="editDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="updateAddress">确 定</el-button>
+        </span>
+    </el-dialog>
+</div>
+
+<script src="assets/js/template-admin.js"></script>
+<script type="text/javascript">
+    var qs = Qs
+	var addOK=UrlParam.paramValues("add") == null ? "no" : UrlParam.paramValues("add").toString()
+	var editOK=UrlParam.paramValues("edit") == null ? "no" : UrlParam.paramValues("edit").toString()
+	var pageNum = UrlParam.paramValues("pageNum") == null ? 1 : UrlParam.paramValues("pageNum").toString()
+    var vmm = new Vue({
+        el: '#app',
+        data: {
+            addresslist: [{
+                filename: "no-img.png"
+            }],
+            key: '',
+            pageNum: pageNum,
+            pageSize: 3,
+			addOK:addOK,
+			editOK:editOK,
+            
+            // 新增活动相关数据
+            addDialogVisible: false,
+            fileList: [],
+            uploadDisabled: false,
+            dialogVisible: false,
+            dialogImageUrl: '',
+            newAddress: {
+                title: '',
+                filename: 'no-img.png',
+                content: ''
+            },
+            
+            // 修改活动相关数据
+            editDialogVisible: false,
+            editFileList: [],
+            editUploadDisabled: false,
+            editAddress: {
+                id: '',
+                title: '',
+                filename: 'no-img.png',
+                content: ''
+            }
+        },
+        mounted() {
+            this.getaddresslist()
+			if(this.addOK=="ok"){
+				this.$message({
+                    message: '新增活动资讯成功！',
+                    type: 'success'
+                });
+			}
+			if(this.editOK=="ok"){
+				this.$message({
+                    message: '活动资讯修改成功！',
+                    type: 'success'
+                });
+			}
+        },
+        methods: {
+            //当前活动列表
+            getaddresslist() {
+                axios.post('/address/list', qs.stringify({
+                    key: this.key,
+                    pageSize: this.pageSize
+                })).then(response => {
+                    layui.use(['laypage', 'layer'], function () {
+                        var laypage = layui.laypage
+                            , layer = layui.layer;
+                        //总页数大于页码总数
+                        laypage.render({
+                            elem: 'demo1'
+                            , theme: "#c8161d"
+                            , curr: vmm.pageNum
+                            , limit: vmm.pageSize
+                            , count: response.data.list.length //数据总数
+                            , jump: function (obj, first) {
+                                vmm.pageNum = obj.curr
+                                vmm.current_page(obj.curr, vmm.pageSize)
+                                console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                            }
+                        });
+                    });
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+
+            current_page(page, pageSize) {
+                axios.post('/address/list', qs.stringify({
+                    key: this.key,
+                    pageNum: page,
+                    pageSize: pageSize,
+                })).then(response => {
+                    this.addresslist = response.data.pageInfo.list
+                    console.log(this.addresslist)
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+
+            handleEdit(row) {
+                this.editAddress = {
+                    id: row.id,
+                    title: row.title,
+                    filename: row.filename,
+                    content: row.content
+                };
+                
+                // 设置图片预览
+                if (row.filename && row.filename !== 'no-img.png') {
+                    this.editFileList = [{
+                        name: row.filename,
+                        url: '../upload/' + row.filename
+                    }];
+                    this.editUploadDisabled = true;
+                } else {
+                    this.editFileList = [];
+                    this.editUploadDisabled = false;
+                }
+                
+                this.editDialogVisible = true;
+            },
+            
+            showAddDialog() {
+                this.addDialogVisible = true;
+                // 重置表单
+                this.newAddress = {
+                    title: '',
+                    filename: 'no-img.png',
+                    content: ''
+                };
+                this.fileList = [];
+                this.uploadDisabled = false;
+            },
+            
+            handleClose(done) {
+                this.$confirm('确认关闭？未保存的数据将会丢失')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => {});
+            },
+            
+            //上传图片的方法（新增）
+            UploadImage(file, fileList) {
+                if (fileList.length >= 1) {
+                    // 上传一个后，后面添加隐藏
+                    this.uploadDisabled = true;
+                }
+                let fd = new FormData();
+                fd.append('file', file.raw); //传给后台接收的名字 file
+                axios.post('/admin/uploadImg', fd, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(response => {
+                    this.newAddress.filename = response.data.data.src;
+                });
+            },
+            
+            //上传图片的方法（修改）
+            UploadEditImage(file, fileList) {
+                if (fileList.length >= 1) {
+                    // 上传一个后，后面添加隐藏
+                    this.editUploadDisabled = true;
+                }
+                let fd = new FormData();
+                fd.append('file', file.raw); //传给后台接收的名字 file
+                axios.post('/admin/uploadImg', fd, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(response => {
+                    this.editAddress.filename = response.data.data.src;
+                });
+            },
+            
+            //预览图片功能
+            handlePictureCardPreview(file) {
+                this.dialogVisible = true;
+                this.dialogImageUrl = file.url;
+            },
+            
+            //移除展示图片功能
+            handleRemove(file, fileList) {
+                //添加+号
+                if (fileList.length === 0) {
+                    this.uploadDisabled = false;
+                    this.editUploadDisabled = false;
+                }
+            },
+            
+            // 新增活动
+            addAddress() {
+                if (this.newAddress.title == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '标题不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if (this.newAddress.content == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '内容不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                
+                axios.post('/address/add', qs.stringify({
+                    title: this.newAddress.title,
+                    filename: this.newAddress.filename,
+                    content: this.newAddress.content
+                })).then(response => {
+                    this.$message({
+                        title: "成功",
+                        showClose: true,
+                        center: true,
+                        message: '新增活动资讯成功!',
+                        type: 'success'
+                    });
+                    this.addDialogVisible = false;
+                    this.getaddresslist();
+                }).catch(error => {
+                    this.$message.error('新增失败，请重试');
+                    console.log(error);
+                });
+            },
+            
+            // 更新活动
+            updateAddress() {
+                if (this.editAddress.title == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '标题不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if (this.editAddress.content == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '内容不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                
+                axios.post('/address/edit', qs.stringify({
+                    id: this.editAddress.id,
+                    title: this.editAddress.title,
+                    filename: this.editAddress.filename,
+                    content: this.editAddress.content
+                })).then(response => {
+                    this.$message({
+                        title: "成功",
+                        showClose: true,
+                        center: true,
+                        message: '修改活动资讯成功!',
+                        type: 'success'
+                    });
+                    this.editDialogVisible = false;
+                    this.getaddresslist();
+                }).catch(error => {
+                    this.$message.error('修改失败，请重试');
+                    console.log(error);
+                });
+            },
+            
+            add() {
+                this.showAddDialog();
+            },
+            
+            del(id) {
+                this.$confirm('确定要删除此活动资讯吗？', '删除确认', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    customClass: 'kf-confirm-dialog'
+                }).then(() => {
+                    axios.post("/address/del", qs.stringify({
+                        id: id,
+                    })).then(response => {
+                        this.$message({
+                            message: '删除成功！',
+                            type: 'success'
+                        });
+                        this.getaddresslist()
+                    }).catch(error => {
+                        this.$message.error('删除失败，请重试');
+                        console.log(error)
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            }
+        }
+    });
+
+    $(document).ready(function () {
+        $('#iframetop').load('top.html');
+    });
+</script>
+
+</body>
+</html>

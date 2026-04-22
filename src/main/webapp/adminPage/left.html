@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title>八闽福建后台管理系统</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        /* 侧边栏样式优化 */
+        .kf-sidebar-inner {
+            height: 100%;
+            background: linear-gradient(to bottom, #3949AB, #303F9F);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        
+        /* Logo区域 */
+        .kf-logo-container {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .kf-logo {
+            height: 36px;
+            width: auto;
+        }
+        
+        .kf-logo-text {
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            margin-left: 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.3s ease;
+        }
+        
+        /* 菜单样式 */
+        .kf-menu {
+            padding: 10px 0;
+        }
+        
+        .kf-menu-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .kf-menu-text {
+            font-size: 14px;
+        }
+        
+        /* 折叠状态下的样式 */
+        .kf-sidebar-collapsed .kf-logo-text {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="kf-sidebar-inner" id="leftapp">
+    <!-- Logo区域 -->
+    <div class="kf-logo-container">
+        <img src="../Tourism/img/logo.png" alt="福建文旅" class="kf-logo">
+        <div class="kf-logo-text">八闽福建管理系统</div>
+    </div>
+    
+    <!-- 菜单区域 -->
+    <div class="kf-menu">
+        <template>
+            <el-menu default-active="1" class="el-menu kf-el-menu" 
+                     :collapse="isCollapse"
+                     background-color="#3949AB"
+                     text-color="rgba(255, 255, 255, 0.9)"
+                     active-text-color="#ffffff">
+                     <el-menu-item index="1" class="kf-el-menu-item" @click="changeurl('main.html',$event)">
+                        <i class="el-icon-document kf-menu-icon"></i>
+                        <span slot="title" class="kf-menu-text">首页</span>
+                    </el-menu-item>
+                <el-menu-item index="0" class="kf-el-menu-item" @click="changeurl('memberlist.html',$event)">
+                    <i class="el-icon-document kf-menu-icon"></i>
+                    <span slot="title" class="kf-menu-text">用户档案管理</span>
+                </el-menu-item>
+                <el-menu-item index="2" class="kf-el-menu-item" @click="changeurl('categorylist.html',$event)">
+                    <i class="el-icon-money kf-menu-icon"></i>
+                    <span slot="title" class="kf-menu-text">景点分类管理</span>
+                </el-menu-item>
+                <el-menu-item index="3" class="kf-el-menu-item" @click="changeurl('paintinglist.html',$event)">
+                    <i class="el-icon-files kf-menu-icon"></i>
+                    <span slot="title" class="kf-menu-text">景点浏览宣传管理</span>
+                </el-menu-item>
+                <el-menu-item index="4" class="kf-el-menu-item" @click="changeurl('articleslist.html',$event)">
+                    <i class="el-icon-edit kf-menu-icon"></i>
+                    <span slot="title" class="kf-menu-text">非遗文化宣传管理</span>
+                </el-menu-item>
+                <el-menu-item index="5" class="kf-el-menu-item" @click="changeurl('commentlist.html',$event)">
+                    <i class="el-icon-chat-line-square kf-menu-icon"></i>
+                    <span slot="title" class="kf-menu-text">非遗宣传评论管理</span>
+                </el-menu-item>
+                <el-menu-item index="6" class="kf-el-menu-item" @click="changeurl('addresslist.html',$event)">
+                    <i class="el-icon-chat-dot-round kf-menu-icon"></i>
+                    <span slot="title" class="kf-menu-text">活动资讯管理</span>
+                </el-menu-item>
+                <el-menu-item index="7" class="kf-el-menu-item" @click="changeurl('chatlist.html',$event)">
+                    <i class="el-icon-message kf-menu-icon"></i>
+                    <span slot="title" class="kf-menu-text">留言互动管理</span>
+                </el-menu-item>
+                <el-menu-item index="8" class="kf-el-menu-item" @click="changeurl('imgadvlist.html',$event)">
+                    <i class="el-icon-picture-outline kf-menu-icon"></i>
+                    <span slot="title" class="kf-menu-text">系统轮播管理</span>
+                </el-menu-item>
+                <el-menu-item index="9" class="kf-el-menu-item" @click="changeurl('adminedit.html',$event)">
+                    <i class="el-icon-user kf-menu-icon"></i>
+                    <span slot="title" class="kf-menu-text">个人信息管理</span>
+                </el-menu-item>
+            </el-menu>
+        </template>
+    </div>
+</div>
+
+<style>
+    /* 覆盖Element UI菜单样式 */
+    .kf-el-menu {
+        border-right: none !important;
+        width: 100% !important;
+    }
+    
+    .kf-el-menu:not(.el-menu--collapse) {
+        width: 240px !important;
+    }
+    
+    .kf-el-menu-item {
+        height: 50px !important;
+        line-height: 50px !important;
+        margin-bottom: 4px !important;
+    }
+    
+    .kf-el-menu-item.is-active {
+        background: rgba(255, 255, 255, 0.15) !important;
+        border-left: 3px solid #ff9800 !important;
+    }
+    
+    .kf-el-menu-item:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+    
+    .kf-menu-icon {
+        margin-right: 10px !important;
+        font-size: 18px !important;
+        width: 24px !important;
+        text-align: center !important;
+    }
+</style>
+
+<script type="text/javascript">
+    // 创建Vue实例并暴露给全局
+    window.leftVue = new Vue({
+        el: '#leftapp',
+        data: {
+            isCollapse: false
+        },
+        mounted() {
+            // 从localStorage获取侧边栏状态
+            const savedState = localStorage.getItem('sidebarCollapsed');
+            if (savedState === 'true') {
+                this.isCollapse = true;
+            }
+            
+            // 监听侧边栏状态变化
+            window.addEventListener('sidebarToggle', (event) => {
+                if (event && event.detail) {
+                    this.isCollapse = event.detail.collapsed;
+                }
+            });
+        },
+        methods: {
+            changeurl(url, e) {
+                // 使用全局函数切换页面
+                if (typeof changeIframePage === 'function') {
+                    changeIframePage(url);
+                } else {
+                    // 兼容旧代码
+                    $("#iframe0").attr("src", url);
+                }
+                
+                // 在移动设备上，点击菜单项后自动折叠侧边栏
+                if (window.innerWidth < 768 && !this.isCollapse) {
+                    if (typeof toggleSidebar === 'function') {
+                        toggleSidebar();
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+
+</html>

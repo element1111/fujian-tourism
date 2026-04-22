@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <title>八闽福建后台管理系统</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        /* 重置样式 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 60px;
+            overflow: hidden;
+        }
+        
+        /* 顶栏样式优化 */
+        .kf-header {
+            height: 60px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0;
+            position: relative;
+            z-index: 100;
+            border-bottom: 1px solid #eee;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+        
+        /* 左侧区域 */
+        .kf-header-left {
+            display: flex;
+            align-items: center;
+            padding-left: 20px;
+        }
+        
+        .kf-toggle-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin-right: 15px;
+            transition: all 0.3s;
+        }
+        
+        .kf-toggle-btn:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .kf-toggle-btn i {
+            font-size: 20px;
+            color: #555;
+        }
+        
+        .kf-header-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+        }
+        
+        /* 右侧区域 */
+        .kf-header-right {
+            display: flex;
+            align-items: center;
+            padding-right: 20px;
+            height: 100%;
+        }
+        
+        .kf-user-info {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        
+        .kf-user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 8px;
+            border: 1px solid #eee;
+        }
+        
+        .kf-user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .kf-user-name {
+            font-size: 14px;
+            color: #333;
+        }
+        
+        /* 按钮样式 */
+        .kf-btn {
+            height: 32px;
+            padding: 0 15px;
+            border-radius: 4px;
+            font-size: 14px;
+            line-height: 32px;
+            cursor: pointer;
+            margin-left: 10px;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .kf-btn-primary {
+            background-color: #c8161d;
+            color: #fff;
+        }
+        
+        .kf-btn-primary:hover {
+            background-color: #d81e25;
+        }
+        
+        .kf-btn-default {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .kf-btn-default:hover {
+            background-color: #e8e8e8;
+        }
+        
+        .kf-btn i {
+            margin-right: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="kf-header" id="topapp">
+    <!-- 左侧区域 -->
+    <div class="kf-header-left">
+        <!-- <div class="kf-toggle-btn" @click="toggleSidebar">
+            <i class="el-icon-s-fold" v-if="!isSidebarCollapsed"></i>
+            <i class="el-icon-s-unfold" v-else></i>
+        </div>
+        <div class="kf-header-title">八闽福建后台管理系统</div> -->
+    </div>
+    
+    <!-- 右侧区域 -->
+    <div class="kf-header-right">
+        <div class="kf-user-info">
+            <div class="kf-user-avatar">
+                <img :src="['../upload/'+admin.filename]" alt="用户头像">
+            </div>
+            <div class="kf-user-name">{{admin.realname}}</div>
+        </div>
+        
+        <button class="kf-btn kf-btn-default" @click="goToFrontend">
+            <i class="el-icon-s-home"></i>返回前台
+        </button>
+        
+        <button class="kf-btn kf-btn-primary" @click="logout">
+            <i class="el-icon-switch-button"></i>退出登录
+        </button>
+    </div>
+</div>
+<script src="assets/js/template-admin.js"></script>
+<script type="text/javascript">
+    var qs = Qs;
+    window.topVue = new Vue({
+        el: "#topapp",
+        data: {
+            admin: {
+                realname: "管理员",
+                filename: "icon1.png"
+            },
+            isSidebarCollapsed: false
+        },
+        mounted() {
+            this.getadmin();
+            
+            // 从localStorage获取侧边栏状态
+            const savedState = localStorage.getItem('sidebarCollapsed');
+            if (savedState === 'true') {
+                this.isSidebarCollapsed = true;
+            }
+        },
+        methods: {
+            getadmin() {
+                axios.post('/admin/checkadmin', qs.stringify({})).then(response => {
+                    if (response.data.data == 400) {
+                        location.replace("login.html");
+                    } else {
+                        this.admin = response.data.admin;
+                    }
+                }).catch(error => {
+                    console.log(error);
+                });
+            },
+            
+            logout() {
+                // 向父页面发送退出登录请求
+                if (window.parent) {
+                    try {
+                        // 确保消息能够正确发送到父页面
+                        window.parent.postMessage({ action: 'logout' }, window.location.origin);
+                        console.log('已发送退出登录请求到父页面');
+                    } catch (error) {
+                        console.error('发送消息到父页面失败:', error);
+                        // 如果发送消息失败，则在当前窗口显示弹窗
+                        this.showLogoutConfirm();
+                    }
+                } else {
+                    // 如果无法访问父窗口，则在当前窗口显示弹窗
+                    // this.showLogoutConfirm();
+                }
+            },
+            
+            // 在当前窗口显示退出确认弹窗（备用方案）
+            showLogoutConfirm() {
+                this.$confirm('确认退出系统吗?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).then(() => {
+                    axios.post('/admin/logout', qs.stringify({})).then(response => {
+                        window.parent.location.replace("login.html");
+                    }).catch(error => {
+                        console.log(error);
+                        // 如果请求失败，仍然跳转到登录页
+                        window.parent.location.replace("login.html");
+                    });
+                }).catch(() => {
+                    this.$message.info('已取消退出');
+                });
+            },
+            
+            goToFrontend() {
+                window.open('../Tourism/index.html', '_blank');
+            },
+            
+            toggleSidebar() {
+                this.isSidebarCollapsed = !this.isSidebarCollapsed;
+                
+                // 保存状态到localStorage
+                localStorage.setItem('sidebarCollapsed', this.isSidebarCollapsed);
+                
+                // 触发自定义事件通知侧边栏
+                window.dispatchEvent(new CustomEvent('sidebarToggle', {
+                    detail: {
+                        collapsed: this.isSidebarCollapsed
+                    }
+                }));
+                
+                // 通知父页面更新布局
+                if (typeof toggleSidebar === 'function') {
+                    toggleSidebar();
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+
+</html>

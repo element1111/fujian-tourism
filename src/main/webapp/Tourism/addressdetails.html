@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <title>活动详情 - 八闽福建</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="../css/element_ui.css"/>
+    <style>
+        /* 全局修复下拉菜单位置 */
+        .el-dropdown-menu {
+            transform: translateY(-100%) !important;
+            top: 0 !important;
+            margin-top: -8px !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" v-cloak>
+        <!-- 国风背景图案 -->
+        <div class="chinese-pattern"></div>
+        
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="container header-inner">
+                <div class="logo">
+                    <img src="img/logo.png" alt="福建文旅">
+                    <div class="logo-text">八闽福建</div>
+                </div>
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+                        <li class="nav-item"><a href="food.html" class="nav-link">非遗探索</a></li>
+                        <li class="nav-item"><a href="scenic.html" class="nav-link">非遗探索</a></li>
+                        <li class="nav-item"><a href="activity.html" class="nav-link active">活动资讯</a></li>
+                        <li class="nav-item"><a href="message.html" class="nav-link">留言互动</a></li>
+                        <li class="nav-item"><a href="personal.html" class="nav-link">个人中心</a></li>
+                    </ul>
+                    <div class="menu-toggle">
+                        <i class="el-icon-menu"></i>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content gradient-bg">
+            <div class="container">
+                <div class="page-title fade-in-up">
+                    <h1>活动详情</h1>
+                </div>
+                
+                <!-- 活动详情 -->
+                <div class="detail-container fade-in-up">
+                    <!-- 水墨装饰 -->
+                    <div class="ink-splash ink-splash-1"></div>
+                    <div class="ink-splash ink-splash-2"></div>
+                    
+                    <div class="detail-header">
+                        <h1 class="detail-title">{{address.title}}</h1>
+                        <div class="detail-meta">
+                            <div class="meta-info">
+                                <span class="meta-item">
+                                    <i class="el-icon-date"></i> 
+                                    <span class="meta-label">创建时间：</span>
+                                    <span class="meta-value">{{formatDate(address.savetime)}}</span>
+                                </span>
+                               
+                            </div>
+                            <!-- 分享按钮 -->
+                            <div class="action-buttons">
+                                <div class="custom-dropdown">
+                                    <button class="share-btn" @click="toggleShareMenu">
+                                        <i class="el-icon-share"></i> 分享
+                                    </button>
+                                    <div class="custom-dropdown-content" v-show="showShareMenu">
+                                        <div class="dropdown-item" @click="copyLink">
+                                            <i class="el-icon-link"></i> 复制链接
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-img-wrapper">
+                        <div class="detail-img">
+                            <img :src="['/upload/'+address.filename]" alt="活动图片" @error="handleImageError">
+                        </div>
+                    </div>
+                    
+                    <div class="detail-content-container">
+                        <div class="detail-content" v-html="address.content"></div>
+                    </div>
+                    
+                    <!-- 活动报名信息 -->
+                    <div class="activity-info">
+                        <h3><i class="el-icon-info"></i> 活动须知</h3>
+                        <ul>
+                            <li>请提前关注活动最新动态，以官方发布的信息为准</li>
+                            <li>活动期间请遵守现场工作人员指引，注意安全</li>
+                            <li>如遇特殊天气情况，活动可能会延期或取消</li>
+                            <li>活动详情可咨询我们：17262016429</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- 相关推荐 -->
+                <div class="related-section fade-in-up">
+                    <h2 class="related-title">相关活动推荐</h2>
+                    <div class="row">
+                        <div class="col-4" v-for="(item, index) in relatedActivities" v-if="index < 3">
+                            <div class="activity-card">
+                                <div class="activity-card-image">
+                                    <img :src="['/upload/'+item.filename]" alt="相关活动" @error="handleImageError">
+                                    <div class="activity-card-overlay">
+                                        <a :href="['addressdetails.html?id='+item.id]" class="view-details-btn">
+                                            <i class="el-icon-view"></i>
+                                            查看详情
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="activity-card-content">
+                                    <h3 class="activity-title">{{item.title}}</h3>
+                                    <div class="activity-meta">
+                                        <span class="activity-time">
+                                            <i class="el-icon-date"></i>
+                                            {{formatDate(item.savetime)}}
+                                        </span>
+                                        
+                                    </div>
+                                    <p class="activity-desc" v-html="getTruncatedContent(item.content, 80)"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-column">
+                        <h3 class="footer-title">关于我们</h3>
+                        <p class="footer-text">八闽福建深耕本土文旅资源，积极推广闽越文化、特色美食与山海风光，为广大游客提供全方位、高品质的福建旅游信息服务</p>
+                    </div>
+                    <div class="footer-column">
+                        <h3 class="footer-title">联系方式</h3>
+                        <p class="footer-text">地址：福建省厦门市翔安区</p>
+                        <p class="footer-text">电话：17262016429</p>
+                        <p class="footer-text">邮箱：997463290@qq.com</p>
+                    </div>
+                    <div class="footer-column">
+                        <h3 class="footer-title">快速链接</h3>
+                        <ul class="footer-links">
+                            <li class="footer-link"><a href="index.html">首页</a></li>
+                            <li class="footer-link"><a href="food.html">景点浏览</a></li>
+                            <li class="footer-link"><a href="scenic.html">非遗探索</a></li>
+                            <li class="footer-link"><a href="activity.html">活动资讯</a></li>
+                            <li class="footer-link"><a href="message.html">留言互动</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; Copyright &copy; {{ currentYear }} 八闽福建 <a target="_blank" href="/adminPage/login.html">后台管理</a></p>
+                    <a class="to-top-link"><img src="img/to-top.png" class="to-top" alt="回到顶部"/></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script src="../js/axios/vue.js"></script>
+    <script src="../js/axios/axios.min.js"></script>
+    <script src="../js/axios/qs.js"></script>
+    <script src="../js/axios/getUrlParams.js"></script>
+    <script src="../js/axios/element_ui.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        var qs = Qs
+        var id = UrlParam.paramValues("id").toString()
+        var vmm = new Vue({
+            el: "#app",
+            data: {
+                currentYear: new Date().getFullYear(),
+                address: {
+                    id: id,
+                    name: "",
+                    filename: "",
+                    content: "",
+                    categoryname: "",
+                    creattime: ""
+                },
+                relatedActivities: [],
+                showShareMenu: false
+            },
+            mounted() {
+                this.show()
+                this.getRelatedActivities()
+            },
+            methods: {
+                show() {
+                    axios.post('/address/show', qs.stringify({
+                        id: this.address.id,
+                    })).then(response => {
+                        this.address = response.data.address
+                    }).catch(error => {
+                        console.log(error)
+                        this.$message.error('获取活动详情失败')
+                    })
+                },
+                getRelatedActivities() {
+                    axios.post('/address/list', qs.stringify({
+                        pageNum: 1,
+                        pageSize: 3
+                    })).then(response => {
+                        this.relatedActivities = response.data.list.filter(item => item.id != this.address.id)
+                    }).catch(error => {
+                        console.log(error)
+                        this.$message.error('获取相关活动失败')
+                    })
+                },
+                //截取内容
+                getTruncatedContent(content, length) {
+                    if (!content) return '';
+                    // 移除HTML标签
+                    let plainText = content.replace(/<[^>]+>/g, '');
+                    if (plainText.length <= length) return plainText;
+                    return plainText.substring(0, length) + '...';
+                },
+                //格式化日期
+                formatDate(timestamp) {
+                    if (!timestamp) return '';
+                    
+                    // 检查timestamp是否为字符串，如果是则尝试转换
+                    if (typeof timestamp === 'string') {
+                        // 如果是日期字符串格式(如：2023-01-01 12:00:00)，直接返回
+                        if (timestamp.includes('-')) {
+                            return timestamp;
+                        }
+                        // 尝试将字符串转为数字
+                        timestamp = Number(timestamp);
+                    }
+                    
+                    // 检查timestamp是否为有效数字
+                    if (isNaN(timestamp) || timestamp <= 0) {
+                        return '未知时间';
+                    }
+                    
+                    // 检查时间戳长度，如果是10位（秒），则转为13位（毫秒）
+                    if (timestamp.toString().length === 10) {
+                        timestamp = timestamp * 1000;
+                    }
+                    
+                    const date = new Date(timestamp);
+                    
+                    // 检查日期是否有效
+                    if (date.getFullYear() < 2000) {
+                        return '未知时间';
+                    }
+                    
+                    return date.getFullYear() + '-' + 
+                           (date.getMonth() + 1).toString().padStart(2, '0') + '-' + 
+                           date.getDate().toString().padStart(2, '0') + ' ' +
+                           date.getHours().toString().padStart(2, '0') + ':' +
+                           date.getMinutes().toString().padStart(2, '0');
+                },
+                toggleShareMenu() {
+                    this.showShareMenu = !this.showShareMenu;
+                    if(this.showShareMenu) {
+                        setTimeout(() => {
+                            document.addEventListener('click', this.closeShareMenu);
+                        }, 0);
+                    }
+                },
+                closeShareMenu(e) {
+                    if(!this.$el.querySelector('.custom-dropdown').contains(e.target)) {
+                        this.showShareMenu = false;
+                        document.removeEventListener('click', this.closeShareMenu);
+                    }
+                },
+                copyLink() {
+                    const url = window.location.href;
+                    const tempInput = document.createElement('input');
+                    tempInput.value = url;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    
+                    // 使用Element UI的消息提示
+                    this.$message({
+                        message: '链接已复制到剪贴板',
+                        type: 'success',
+                        duration: 2000,
+                        offset: 60
+                    });
+                    
+                    this.showShareMenu = false;
+                },
+                // 处理图片加载错误
+                handleImageError(e) {
+                    e.target.src = 'img/default-img.png';
+                }
+            }
+        })
+    </script>
+    
+    <style>
+        .activity-info {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .activity-info h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .activity-info h3 i {
+            margin-right: 8px;
+        }
+        
+        .activity-info ul {
+            padding-left: 20px;
+        }
+        
+        .activity-info li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        
+        /* 活动详情页样式 */
+        .detail-container {
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            padding: 35px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .detail-header {
+            margin-bottom: 30px;
+            position: relative;
+            border-bottom: 1px dashed rgba(139, 35, 35, 0.2);
+            padding-bottom: 25px;
+        }
+        
+        .detail-title {
+            font-size: 32px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            line-height: 1.3;
+        }
+        
+        .detail-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .meta-info {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .meta-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background-color: rgba(139, 35, 35, 0.05);
+            border-radius: 20px;
+            color: #666;
+            font-size: 15px;
+        }
+        
+        .meta-item i {
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+        
+        .meta-label {
+            color: #888;
+        }
+        
+        .meta-value {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .custom-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .custom-dropdown-content {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background-color: #fff;
+            min-width: 140px;
+            box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            border-radius: 4px;
+            border: 1px solid #e4e7ed;
+            margin-bottom: 12px;
+        }
+        
+        .custom-dropdown-content::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #fff;
+        }
+        
+        .custom-dropdown-content::before {
+            content: '';
+            position: absolute;
+            bottom: -7px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 6px solid #e4e7ed;
+        }
+        
+        .dropdown-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            color: #606266;
+            font-size: 14px;
+            line-height: 1.5;
+            display: flex;
+            align-items: center;
+        }
+        
+        .dropdown-item i {
+            margin-right: 5px;
+            font-size: 16px;
+        }
+        
+        .dropdown-item:hover {
+            background-color: #f5f7fa;
+            color: #c8161d;
+        }
+        
+        .share-btn {
+            background-color: #fff;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(139, 35, 35, 0.1);
+        }
+        
+        .share-btn:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(139, 35, 35, 0.15);
+        }
+        
+        .detail-img-wrapper {
+            margin: 35px 0;
+            padding: 0 20px;
+        }
+        
+        .detail-img {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: all 0.5s ease;
+        }
+        
+        .detail-img:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .detail-img img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.8s ease;
+            object-fit: cover;
+        }
+        
+        .detail-img:hover img {
+            transform: scale(1.05);
+        }
+        
+        .detail-content-container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .detail-content {
+            line-height: 1.8;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .detail-content p {
+            margin-bottom: 20px;
+        }
+        
+        .detail-content img {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        
+        .detail-content h1, 
+        .detail-content h2, 
+        .detail-content h3, 
+        .detail-content h4, 
+        .detail-content h5, 
+        .detail-content h6 {
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .detail-content ul, 
+        .detail-content ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-content li {
+            margin-bottom: 10px;
+        }
+        
+        .detail-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        
+        .detail-content table th,
+        .detail-content table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        
+        .detail-content table th {
+            background-color: #f5f5f5;
+        }
+        
+        @media (max-width: 768px) {
+            .detail-container {
+                padding: 20px;
+            }
+            
+            .detail-title {
+                font-size: 24px;
+                margin-bottom: 15px;
+            }
+            
+            .detail-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .meta-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .action-buttons {
+                width: 100%;
+            }
+            
+            .share-btn {
+                width: 100%;
+            }
+            
+            .detail-img-wrapper {
+                padding: 0;
+                margin: 25px 0;
+            }
+        }
+        
+        /* 活动卡片样式 */
+        .activity-card {
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+        }
+        
+        .activity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .activity-card-image {
+            position: relative;
+            padding-top: 60%;
+            overflow: hidden;
+        }
+        
+        .activity-card-image img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .activity-card:hover .activity-card-image img {
+            transform: scale(1.1);
+        }
+        
+        .activity-card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(139, 35, 35, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .activity-card:hover .activity-card-overlay {
+            opacity: 1;
+        }
+        
+        .view-details-btn {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: 2px solid #fff;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            transform: translateY(20px);
+        }
+        
+        .activity-card:hover .view-details-btn {
+            transform: translateY(0);
+        }
+        
+        .view-details-btn:hover {
+            background: #fff;
+            color: var(--primary-color);
+        }
+        
+        .activity-card-content {
+            padding: 20px;
+        }
+        
+        .activity-title {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+        
+        .activity-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .activity-time,
+        .activity-category {
+            color: #666;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .activity-time i,
+        .activity-category i {
+            color: var(--primary-color);
+        }
+        
+        .activity-desc {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        @media (max-width: 768px) {
+            .col-4 {
+                width: 100%;
+            }
+            
+            .activity-card {
+                margin-bottom: 20px;
+            }
+            
+            .activity-meta {
+                flex-direction: column;
+                gap: 8px;
+            }
+        }
+    </style>
+</body>
+</html> 

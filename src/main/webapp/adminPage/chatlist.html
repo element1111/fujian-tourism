@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>八闽福建 - 留言互动管理</title>
+    <!-- 网站图标 -->
+    <link rel="shortcut icon" type="image/png" href="../Tourism/img/logo.png">
+    <link rel="stylesheet" href="assets/css/template-admin.css"/>
+</head>
+<body class="list-page">
+
+<div class="kf-page-container" id="app" v-cloak>
+    <!-- 页面标题区域 -->
+    <div class="kf-page-header">
+        <div class="kf-page-title">
+            <h2>留言互动管理</h2>
+        </div>
+        <div class="kf-search-area">
+            <div class="kf-search-box">
+                <input class="kf-search-input" v-model="key" type="text" placeholder="请输入留言人搜索..." id="text-input">
+            </div>
+            <button class="kf-btn kf-btn-icon" @click="getchatlist()">
+                <i class="el-icon-search"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- 内容卡片 -->
+    <div class="kf-card">
+        <div class="kf-card-header">
+            <h3>留言互动列表</h3>
+        </div>
+        <div class="kf-card-body">
+            <div class="kf-table-container">
+                <div class="kf-table-responsive">
+                    <el-table :data="chatlist" border style="width: 100%">
+                        <el-table-column prop="content" label="留言内容" align="center"></el-table-column>
+                        <el-table-column prop="member.tname" label="留言人" align="center" width="120"></el-table-column>
+                        <el-table-column label="留言时间" align="center" width="135px">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{scope.row.savetime}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="hfcontent" label="回复内容" align="center"></el-table-column>
+                        <el-table-column prop="hfname" label="回复人" align="center" width="120"></el-table-column>
+                        <el-table-column label="回复时间" align="center" width="135px">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{scope.row.hftime}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" align="center" width="240">
+                            <template slot-scope="scope">
+                                <el-button v-if="scope.row.hfcontent==null || scope.row.hfcontent==''"
+                                           @click="openAddDialog(scope.row.id)" type="text" size="small">
+                                    <i class="el-icon-chat-line-square"></i> 回复
+                                </el-button>
+                                <el-button @click="del(scope.row.id)" type="text" size="small">
+                                    <i class="el-icon-delete"></i> 删除
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <!-- 分页区域 -->
+            <div class="kf-pagination" id="demo1"></div>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <div class="kf-footer">
+        <p>八闽福建 © {{ currentYear }} 版权所有</p>
+    </div>
+    
+    <!-- 回复留言弹窗 -->
+    <el-dialog
+        title="留言回复"
+        :visible.sync="openAdd"
+        width="50%"
+        :before-close="handleClose"
+        custom-class="kf-dialog">
+        <div class="kf-form-container">
+            <el-form :model="chat" label-width="80px" class="kf-form">
+                <el-form-item label="回复内容">
+                    <el-input v-model="chat.hfcontent" type="textarea" :rows="3" placeholder="请输入回复内容..."></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="closeAddDialog()">取 消</el-button>
+            <el-button type="primary" @click="add()">确 定</el-button>
+        </span>
+    </el-dialog>
+</div>
+
+<script src="assets/js/template-admin.js"></script>
+<script type="text/javascript">
+    var qs = Qs
+    var pageNum = UrlParam.paramValues("pageNum") == null ? 1 : UrlParam.paramValues("pageNum").toString()
+    var vmm = new Vue({
+        el: '#app',
+        data: {
+            currentYear: new Date().getFullYear(),
+            chatlist: [],
+            key: '',
+            pageNum: pageNum,
+            pageSize: 10,
+
+			openAdd: false,
+			chat: {
+				hfcontent: "",
+				id: "",
+			},
+            admin: {},
+        },
+        mounted() {
+            this.getchatlist()
+            this.show()
+        },
+        methods: {
+            //当前留言列表
+            getchatlist() {
+                axios.post('/admin/chatList', qs.stringify({
+                    key: this.key,
+                    pageSize: this.pageSize
+                })).then(response => {
+                    layui.use(['laypage', 'layer'], function () {
+                        var laypage = layui.laypage
+                            , layer = layui.layer;
+                        //总页数大于页码总数
+                        laypage.render({
+                            elem: 'demo1'
+                            , theme: "#c8161d"
+                            , curr: vmm.pageNum
+                            , limit: vmm.pageSize
+                            , count: response.data.list.length //数据总数
+                            , jump: function (obj, first) {
+                                vmm.pageNum = obj.curr
+                                vmm.current_page(obj.curr, vmm.pageSize)
+                                console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                            }
+                        });
+                    });
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+
+            current_page(page, pageSize) {
+                axios.post('/admin/chatList', qs.stringify({
+                    key: this.key,
+                    pageNum: page,
+                    pageSize: pageSize,
+                })).then(response => {
+                    this.chatlist = response.data.pageInfo.list
+
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+
+			openAddDialog(id) {
+				this.openAdd = true
+				this.chat.id = id
+			},
+            
+            handleClose(done) {
+                this.$confirm('确认关闭？未保存的数据将会丢失')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => {});
+            },
+            
+			closeAddDialog() {
+				this.openAdd = false
+				this.chat.id = ''
+				this.chat.hfcontent = ''
+			},
+            
+            del(id) {
+                this.$confirm('确定要删除此留言吗？', '删除确认', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    customClass: 'kf-confirm-dialog'
+                }).then(() => {
+                    axios.post("/admin/chatDel", qs.stringify({
+                        id: id,
+                    })).then(response => {
+                        this.$message({
+                            message: '删除成功！',
+                            type: 'success'
+                        });
+                        this.getchatlist()
+                    }).catch(error => {
+                        this.$message.error('删除失败，请重试');
+                        console.log(error)
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            
+			add() {
+				if (this.chat.hfcontent == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '回复内容不能为空!',
+                        type: 'warning'
+                    });
+					return false;
+				}
+				axios.post('/admin/chatEdit', qs.stringify({
+					id: this.chat.id,
+                    hfname: this.admin.realname,
+					hfcontent: this.chat.hfcontent,
+				})).then(response => {
+                    this.$message({
+                        title: "成功",
+                        showClose: true,
+                        center: true,
+                        message: '回复成功!',
+                        type: 'success'
+                    });
+					this.getchatlist()
+					this.closeAddDialog()
+				}).catch(error => {
+                    this.$message.error('回复失败，请重试');
+					console.log(error)
+				})
+			},
+            
+            show() {
+				axios.post('/admin/checkadmin', qs.stringify({
+				})).then(response => {
+					if(response.data.data == 200) {
+						this.admin = response.data.admin
+						$('#imgname').attr('src', "../upload/" + this.admin.filename); //图片链接（base64）
+					} else {
+						location.replace("login.html")
+					}
+				}).catch(error => {
+					console.log(error)
+				})
+            },
+        }
+    });
+
+    $(document).ready(function () {
+        $('#iframetop').load('top.html');
+    });
+</script>
+
+</body>
+</html>

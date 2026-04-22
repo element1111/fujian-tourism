@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>八闽福建 - 用户管理</title>
+    <!-- 网站图标 -->
+    <link rel="shortcut icon" type="image/png" href="../Tourism/img/logo.png">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="assets/css/template-admin.css" />
+    <!-- 引入字体图标 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.4/css/all.css">
+    <style>
+        /* 用户列表页国风样式 */
+        body {
+            background-color: #f9f6f2;
+            font-family: "STKaiti", "楷体", "Microsoft YaHei", "微软雅黑", sans-serif;
+        }
+        
+        .kf-page-container {
+            padding: 0;
+            width: 100%;
+            min-height: 100vh;
+            background-color: #f9f6f2;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='%23c8161d' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+            position: relative;
+        }
+        
+        /* 水墨装饰 */
+        .kf-page-container::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0c40 40 80 40 100 0v100H0V0z' fill='%23c8161d' fill-opacity='0.03'/%3E%3C/svg%3E");
+            background-size: 150px 150px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        /* 页面标题区域 */
+        .kf-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e8d9c5;
+            position: relative;
+            margin-bottom: 30px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 8px 8px 0 0;
+        }
+        
+        /* 标题装饰 */
+        .kf-page-header::after {
+            content: "";
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #c8161d, transparent);
+        }
+        
+        .kf-page-title {
+            display: flex;
+            align-items: center;
+        }
+        
+        .kf-page-title h2 {
+            font-size: 24px;
+            color: #8b4513;
+            font-weight: 500;
+            margin: 0;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        /* 标题前的装饰 */
+        .kf-page-title h2::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 5px;
+            height: 24px;
+            background-color: #c8161d;
+            border-radius: 2px;
+        }
+        
+        /* 搜索区域 */
+        .kf-search-area {
+            display: flex;
+            align-items: center;
+        }
+        
+        .kf-search-box {
+            position: relative;
+            margin-right: 15px;
+        }
+        
+        .kf-search-input {
+            width: 250px;
+            height: 40px;
+            border: 1px solid #e8d9c5;
+            border-radius: 20px;
+            padding: 0 20px;
+            font-size: 14px;
+            color: #5c4033;
+            background-color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            font-family: inherit;
+        }
+        
+        .kf-search-input:focus {
+            border-color: #c8161d;
+            box-shadow: 0 0 0 2px rgba(200, 22, 29, 0.2);
+            outline: none;
+        }
+        
+        .kf-search-input::placeholder {
+            color: #b0a090;
+        }
+        
+        /* 按钮样式 */
+        .kf-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+            padding: 0 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+            background: linear-gradient(135deg, #c8161d, #e74c3c);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-left: 10px;
+            box-shadow: 0 2px 5px rgba(200, 22, 29, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .kf-btn:before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.5s ease;
+        }
+        
+        .kf-btn:hover:before {
+            left: 100%;
+        }
+        
+        .kf-btn:hover {
+            background: linear-gradient(135deg, #b71c1c, #d32f2f);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(200, 22, 29, 0.4);
+        }
+        
+        .kf-btn i {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+        
+        .kf-btn-icon {
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        
+        .kf-btn-icon i {
+            margin-right: 0;
+        }
+        
+        /* 内容卡片 */
+        .kf-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            margin: 0 30px 30px 30px;
+            border: none;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* 卡片头部 */
+        .kf-card-header {
+            background-color: #fff;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e8d9c5;
+            position: relative;
+        }
+        
+        .kf-card-header h3 {
+            color: #8b4513;
+            font-size: 20px;
+            font-weight: 500;
+            margin: 0;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        .kf-card-header h3::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 18px;
+            background-color: #c8161d;
+            border-radius: 2px;
+        }
+        
+        /* 卡片内容 */
+        .kf-card-body {
+            padding: 20px 30px;
+        }
+        
+        /* 表格样式 */
+        .kf-table-container {
+            width: 100%;
+            overflow: hidden;
+            border-radius: 4px;
+        }
+        
+        .kf-table-responsive {
+            overflow-x: auto;
+            min-height: 300px;
+        }
+        
+        .kf-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 0;
+            table-layout: fixed;
+        }
+        
+        .kf-table thead th {
+            background-color: #f5efe5;
+            color: #8b4513;
+            font-weight: 500;
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 2px solid #e8d9c5;
+            position: relative;
+            white-space: nowrap;
+        }
+        
+        .kf-table thead th::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, #c8161d, transparent);
+            opacity: 0.5;
+        }
+        
+        .kf-table tbody td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f0e6d9;
+            color: #5c4033;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .kf-table tbody tr {
+            transition: all 0.3s ease;
+            height: 60px;
+        }
+        
+        .kf-table tbody tr:hover {
+            background-color: #f9f5f0;
+            transform: translateX(5px);
+        }
+        
+        .kf-table tbody tr:nth-child(odd) {
+            background-color: #fdfaf5;
+        }
+        
+        .kf-table tbody tr:nth-child(even) {
+            background-color: #fff;
+        }
+        
+        /* 操作按钮 */
+        .kf-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: #fff;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .kf-action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .kf-edit-btn {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+        }
+        
+        .kf-delete-btn {
+            background: linear-gradient(135deg, #f44336, #c62828);
+        }
+        
+        /* 分页样式 */
+        .kf-pagination {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        /* 页脚样式 */
+        .kf-footer {
+            text-align: center;
+            margin: 0 30px;
+            padding: 20px 0;
+            color: #8b4513;
+            font-size: 14px;
+            border-top: 1px solid #e8d9c5;
+            position: relative;
+        }
+        
+        .kf-footer::before {
+            content: "";
+            position: absolute;
+            top: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #c8161d, transparent);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .kf-page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 15px 20px;
+            }
+            
+            .kf-search-area {
+                margin-top: 15px;
+                width: 100%;
+            }
+            
+            .kf-search-box {
+                width: 100%;
+                margin-right: 10px;
+            }
+            
+            .kf-search-input {
+                width: 100%;
+            }
+            
+            .kf-card {
+                margin: 0 15px 20px 15px;
+            }
+            
+            .kf-card-header, .kf-card-body {
+                padding: 15px 20px;
+            }
+            
+            .kf-table thead th, .kf-table tbody td {
+                padding: 12px 15px;
+            }
+            
+            .kf-footer {
+                margin: 0 15px;
+            }
+        }
+    </style>
+</head>
+<body class="list-page">
+
+<div class="kf-page-container">
+    <div id="app">
+        <!-- 页面标题区域 -->
+        <div class="kf-page-header">
+            <div class="kf-page-title">
+                <h2>用户管理</h2>
+            </div>
+            <div class="kf-search-area">
+                <div class="kf-search-box">
+                    <input class="kf-search-input" v-model="key" type="text" placeholder="请输入姓名搜索..." id="text-input">
+                </div>
+                <button class="kf-btn kf-btn-icon" @click="getuserlist()">
+                    <i class="fas fa-search"></i>
+                </button>
+                <a class="kf-btn" href="useradd.html">
+                    <i class="fas fa-user-plus"></i>添加用户
+                </a>
+            </div>
+        </div>
+        
+        <!-- 内容卡片 -->
+        <div class="kf-card">
+            <div class="kf-card-header">
+                <h3>员工列表</h3>
+            </div>
+            <div class="kf-card-body">
+                <div class="kf-table-container">
+                    <div class="kf-table-responsive">
+                        <table class="kf-table">
+                            <thead>
+                                <tr>
+                                    <th width="15%">用户名</th>
+                                    <th width="15%">密码</th>
+                                    <th width="15%">姓名</th>
+                                    <th width="10%">性别</th>
+                                    <th width="20%">电话</th>
+                                    <th width="15%">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="user in userlist">
+                                    <td>{{user.username}}</td>
+                                    <td>{{user.userpwd}}</td>
+                                    <td>{{user.realname}}</td>
+                                    <td>{{user.sex}}</td>
+                                    <td>{{user.tel}}</td>
+                                    <td>
+                                        <a class="kf-action-btn kf-edit-btn" :href="['useredit.html?id='+user.id+'&pageNum='+pageNum]">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a class="kf-action-btn kf-delete-btn" href="javascript:;" @click="del(user.id)">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- 分页区域 -->
+                <div class="kf-pagination" id="demo1"></div>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <div class="kf-footer">
+            <p>八闽福建 © {{ currentYear }} 版权所有</p>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/template-admin.js"></script>
+<script type="text/javascript">
+    var qs = Qs
+    var pageNum = UrlParam.paramValues("pageNum")==null?1:UrlParam.paramValues("pageNum").toString()
+    var vmm = new Vue({
+        el: '#app',
+        data: {
+            currentYear: new Date().getFullYear(),
+            userlist: [],
+            key: '',
+            pageNum:pageNum,
+            pageSize: 10,
+        },
+        mounted() {
+            this.getuserlist()
+        },
+        methods: {
+            //当前用户列表
+            getuserlist() {
+                axios.post('userList', qs.stringify({
+                    key: this.key,
+                    usertype:"员工",
+                    pageSize: this.pageSize
+                })).then(response => {
+                    layui.use(['laypage', 'layer'], function () {
+                        var laypage = layui.laypage
+                            , layer = layui.layer;
+                        //总页数大于页码总数
+                        laypage.render({
+                            elem: 'demo1'
+                            ,theme:"#c8161d"
+                            ,curr:vmm.pageNum
+                            , limit: vmm.pageSize
+                            , count: response.data.list.length //数据总数
+                            , jump: function (obj, first) {
+                                vmm.pageNum = obj.curr
+                                vmm.current_page(obj.curr, vmm.pageSize)
+                                console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                            }
+                        });
+                    });
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+
+            current_page(page, pageSize) {
+                axios.post('userList', qs.stringify({
+                    key: this.key,
+                    usertype:"员工",
+                    pageNum: page,
+                    pageSize: pageSize,
+                })).then(response => {
+                    this.userlist = response.data.pageInfo.list
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+
+            del(id) {
+                layer.confirm('确定要删除此用户吗？', {
+                    btn: ['确定','取消'],
+                    title: '删除确认',
+                    skin: 'layui-layer-lan'
+                }, function(){
+                    axios.post("userDel", qs.stringify({
+                        id: id,
+                    })).then(response => {
+                        layer.msg('删除成功', {icon: 1});
+                        vmm.getuserlist()
+                    }).catch(error => {
+                        layer.msg('删除失败', {icon: 2});
+                        console.log(error)
+                    })
+                });
+            }
+        }
+    });
+
+    $(document).ready(function () {
+        $('#iframetop').load('top.html');
+    });
+</script>
+
+</body>
+</html>

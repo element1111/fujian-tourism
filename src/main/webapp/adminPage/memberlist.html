@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>八闽福建 - 用户档案管理</title>
+    <!-- 网站图标 -->
+    <link rel="shortcut icon" type="image/png" href="../Tourism/img/logo.png">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="assets/css/template-admin.css" />
+    <style>
+        
+    </style>
+</head>
+<body class="list-page">
+
+<div class="kf-page-container">
+    <div id="app" v-cloak>
+        <!-- 页面标题区域 -->
+        <div class="kf-page-header">
+            <div class="kf-page-title">
+                <h2>用户档案管理</h2>
+                        </div>
+            <div class="kf-search-area">
+                <div class="kf-search-box">
+                    <input class="kf-search-input" v-model="key" type="text" placeholder="请输入姓名搜索..." id="text-input">
+                                    </div>
+                <button class="kf-btn kf-btn-icon" @click="getmemberlist()">
+                    <i class="el-icon-search"></i>
+                </button>
+                <button class="kf-btn" @click="showAddUserDialog">
+                    <i class="el-icon-plus"></i> 新增用户
+                </button>
+                        </div>
+                    </div>
+        
+        <!-- 内容卡片 -->
+        <div class="kf-card">
+            <div class="kf-card-header">
+                <h3>用户档案列表</h3>
+            </div>
+            <div class="kf-card-body">
+                <div class="kf-table-container">
+                    <div class="kf-table-responsive">
+                                    <el-table :data="memberlist" border style="width: 100%">
+                                        <el-table-column prop="tname" label="姓名" align="center"></el-table-column>
+                            <el-table-column label="头像" align="center" width="100">
+                                            <template slot-scope="scope">
+                                    <img :src="['../upload/'+scope.row.filename]" class="kf-user-avatar">
+                                            </template>
+                                        </el-table-column>
+                            <el-table-column prop="uname" label="账号" align="center"></el-table-column>
+                            <el-table-column prop="upass" label="密码" align="center"></el-table-column>
+                            <el-table-column prop="sex" label="性别" align="center" width="80"></el-table-column>
+                            <el-table-column prop="birthtime" label="生日" align="center"></el-table-column>
+                            <el-table-column prop="tel" label="电话" align="center"></el-table-column>
+                            <el-table-column prop="email" label="邮箱" align="center"></el-table-column>
+                            <el-table-column prop="status" label="状态" align="center" width="100">
+                                            <template slot-scope="scope">
+                                    <span :style="{ color: scope.row.status === '正常' ? '#4caf50' : '#f44336' }">
+                                        {{ scope.row.status }}
+                                    </span>
+                                            </template>
+                                        </el-table-column>
+                            <el-table-column label="操作" align="center" width="240">
+                                <template slot-scope="scope">
+                                    <el-button @click="statusedit(scope.row.id)" type="text" size="small">
+                                        <i class="el-icon-refresh"></i> 修改状态
+                                    </el-button>
+                                    <el-button @click="del(scope.row.id)" type="text" size="small">
+                                        <i class="el-icon-delete"></i> 删除
+                                    </el-button>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </div>
+                <!-- 分页区域 -->
+                <div class="kf-pagination" id="demo1"></div>
+            </div>
+        </div>
+        
+        <!-- 页脚 -->
+        <div class="kf-footer">
+            <p>八闽福建 © {{ currentYear }} 版权所有</p>
+        </div>
+        
+        <!-- 新增用户弹窗 -->
+        <el-dialog
+            title="新增用户"
+            :visible.sync="addUserDialogVisible"
+            width="50%"
+            :before-close="handleClose"
+            custom-class="kf-dialog">
+            <div class="kf-form-container">
+                <el-form :model="newUser" label-width="80px" class="kf-form">
+                    <el-form-item label="头像">
+                        <el-upload
+                            ref="upload"
+                            action=""
+                            list-type="picture-card"
+                            :on-preview="handlePictureCardPreview"
+                            :on-remove="handleRemove"
+                            :on-change="UploadImage"
+                            :file-list="fileList"
+                            :limit="1"
+                            multiple
+                            :class="{disabled:uploadDisabled}"
+                            :auto-upload="false">
+                            <i class="el-icon-plus"></i>
+                        </el-upload>
+                        <el-dialog :visible.sync="dialogVisible">
+                            <img width="100%" :src="dialogImageUrl" alt="图片扩大"/>
+                        </el-dialog>
+                    </el-form-item>
+                    
+                    <el-form-item label="账号">
+                        <el-input v-model="newUser.uname" placeholder="请输入登录账号" @blur="checkUsername"></el-input>
+                    </el-form-item>
+                    
+                    <el-form-item label="密码">
+                        <el-input v-model="newUser.upass" placeholder="请输入密码" type="password"></el-input>
+                    </el-form-item>
+                    
+                    <el-form-item label="昵称">
+                        <el-input v-model="newUser.tname" placeholder="请输入昵称"></el-input>
+                    </el-form-item>
+                    
+                    <el-form-item label="性别">
+                        <el-select v-model="newUser.sex" placeholder="请选择性别" style="width: 100%">
+                            <el-option label="男" value="男"></el-option>
+                            <el-option label="女" value="女"></el-option>
+                        </el-select>
+                    </el-form-item>
+                    
+                    <el-form-item label="电话">
+                        <el-input v-model="newUser.tel" placeholder="请输入电话号码"></el-input>
+                    </el-form-item>
+                    
+                    <el-form-item label="邮箱">
+                        <el-input v-model="newUser.email" placeholder="请输入邮箱地址"></el-input>
+                    </el-form-item>
+                    
+                    <el-form-item label="生日">
+                        <el-date-picker
+                            v-model="newUser.birthtime"
+                            type="date"
+                            placeholder="选择日期"
+                            format="yyyy-MM-dd"
+                            value-format="yyyy-MM-dd">
+                        </el-date-picker>
+                    </el-form-item>
+                    
+                    <el-form-item label="简介">
+                        <el-input v-model="newUser.title" placeholder="请输入个人简介" type="textarea" :rows="3"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="addUserDialogVisible = false">取 消</el-button>
+                <el-button type="primary" @click="reg">确 定</el-button>
+            </span>
+        </el-dialog>
+    </div>
+</div>
+
+<script src="assets/js/template-admin.js"></script>
+<script type="text/javascript">
+    var qs = Qs
+    var pageNum = UrlParam.paramValues("pageNum") == null ? 1 : UrlParam.paramValues("pageNum").toString()
+    var vmm = new Vue({
+        el: '#app',
+        data: {
+            currentYear: new Date().getFullYear(),
+            memberlist: [],
+            key: '',
+            pageNum: pageNum,
+            pageSize: 5,
+            // 新增用户相关数据
+            addUserDialogVisible: false,
+            fileList: [],
+            uploadDisabled: false,
+            dialogVisible: false,
+            dialogImageUrl: '',
+            newUser: {
+                uname: '',
+                upass: '',
+                tname: '',
+                sex: '男',
+                birthtime: '',
+                tel: '',
+                email: '',
+                filename: 'icon1.png',
+                status: '',
+                title: '',
+                address: '',
+            }
+        },
+        created() {
+            this.getmemberlist()
+        },
+        methods: {
+            //当前用户列表
+            getmemberlist() {
+                axios.post('/admin/memberList', qs.stringify({
+                    key: this.key,
+                    pageSize: this.pageSize
+                })).then(response => {
+                    layui.use(['laypage', 'layer'], function () {
+                        var laypage = layui.laypage
+                            , layer = layui.layer;
+                        //总页数大于页码总数
+                        laypage.render({
+                            elem: 'demo1'
+                            , theme: "#c8161d"
+                            , curr: vmm.pageNum
+                            , limit: vmm.pageSize
+                            , count: response.data.list.length //数据总数
+                            , jump: function (obj, first) {
+                                vmm.pageNum = obj.curr
+                                vmm.current_page(obj.curr, vmm.pageSize)
+                                console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                            }
+                        });
+                    });
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+
+            current_page(page, pageSize) {
+                axios.post('/admin/memberList', qs.stringify({
+                    key: this.key,
+                    pageNum: page,
+                    pageSize: pageSize,
+                })).then(response => {
+                    this.memberlist = response.data.pageInfo.list
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+
+            del(id) {
+                this.$confirm('确定要删除此用户吗？', '删除确认', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    customClass: 'kf-confirm-dialog'
+                }).then(() => {
+                axios.post("/admin/memberDel", qs.stringify({
+                    id: id,
+                })).then(response => {
+                        this.$message({
+                            message: '删除成功！',
+                            type: 'success'
+                        });
+                    this.getmemberlist()
+                }).catch(error => {
+                        this.$message.error('删除失败，请重试');
+                    console.log(error)
+                })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+
+            statusedit(id) {
+                this.$confirm('确定要修改此用户状态吗？', '状态修改', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    customClass: 'kf-confirm-dialog'
+                }).then(() => {
+                axios.post("/admin/statusedit", qs.stringify({
+                    id: id,
+                })).then(response => {
+					this.$message({
+                            message: '状态修改成功！',
+						type: 'success'
+					});
+                    this.getmemberlist()
+                }).catch(error => {
+                        this.$message.error('状态修改失败，请重试');
+                    console.log(error)
+                })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消修改'
+                    });
+                });
+            },
+            
+            // 新增用户相关方法
+            showAddUserDialog() {
+                this.addUserDialogVisible = true;
+                // 重置表单
+                this.newUser = {
+                    uname: '',
+                    upass: '',
+                    tname: '',
+                    sex: '男',
+                    birthtime: '',
+                    tel: '',
+                    email: '',
+                    filename: 'icon1.png',
+                    status: '',
+                    title: '',
+                    address: '',
+                };
+                this.fileList = [];
+                this.uploadDisabled = false;
+            },
+            
+            handleClose(done) {
+                this.$confirm('确认关闭？未保存的数据将会丢失')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => {});
+            },
+            
+            checkUsername() {
+                if(this.newUser.uname == "") {
+                    return false;
+                }
+                axios.post('/checkUname', qs.stringify({
+                    uname: this.newUser.uname,
+                })).then(response => {
+                    if(response.data.data == 400) {
+                        this.$message({
+                            title: "提示",
+                            showClose: true,
+                            center: true,
+                            message: '登录名已存在，请更换！',
+                            type: 'warning'
+                        });
+                        this.newUser.uname = "";
+                    }
+                }).catch(error => {
+                    console.log(error);
+                });
+            },
+            
+            //上传图片的方法
+            UploadImage(file, fileList) {
+                if (fileList.length >= 1) {
+                    // 上传一个后，后面添加隐藏
+                    this.uploadDisabled = true;
+                }
+                let fd = new FormData();
+                fd.append('file', file.raw); //传给后台接收的名字 file
+                axios.post('/admin/uploadImg', fd, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(response => {
+                    this.newUser.filename = response.data.data.src;
+                });
+            },
+            
+            //预览图片功能
+            handlePictureCardPreview(file) {
+                this.dialogVisible = true;
+                this.dialogImageUrl = file.url;
+            },
+            
+            //移除展示图片功能
+            handleRemove(file, fileList) {
+                //添加+号
+                if (fileList.length === 0) {
+                    this.uploadDisabled = false;
+                }
+            },
+            
+            reg() {
+                if (this.newUser.uname == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '账号不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if (this.newUser.upass == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '密码不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+
+                //验证密码
+                if (!/^[a-zA-Z0-9]{6,12}$/.test(this.newUser.upass)) {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '密码需要包含数字英文大小写，6到12位!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if(this.newUser.email == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '邮箱不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                // 验证邮箱
+                if (!/^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*\.[a-zA-Z0-9]{2,6}$/.test(this.newUser.email)) {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '邮箱输入错误!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                axios.post('/admin/register', qs.stringify({
+                    uname: this.newUser.uname,
+                    upass: this.newUser.upass,
+                    tname: this.newUser.tname,
+                    sex: this.newUser.sex,
+                    birthtime: this.newUser.birthtime,
+                    tel: this.newUser.tel,
+                    email: this.newUser.email,
+                    filename: this.newUser.filename,
+                    status: '正常'
+                })).then(response => {
+                    this.$message({
+                        title: "成功",
+                        showClose: true,
+                        center: true,
+                        message: '注册成功!',
+                        type: 'success'
+                    });
+                    this.addUserDialogVisible = false;
+                    this.getmemberlist();
+                }).catch(error => {
+                    console.log(error);
+                    this.$message({
+                        title: "错误",
+                        showClose: true,
+                        center: true,
+                        message: '添加用户失败: ' + (error.response ? error.response.data : error.message),
+                        type: 'error'
+                    });
+                });
+            }
+        }
+    });
+
+    $(document).ready(function () {
+        $('#iframetop').load('top.html');
+    });
+</script>
+
+</body>
+</html>

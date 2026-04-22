@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <title>八闽福建</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="../css/element_ui.css"/>
+    <style>
+        /* 增强首页样式 */
+        .hero-section {
+            position: relative;
+            margin-bottom: 50px;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .carousel {
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        /* 自定义轮播图样式 - 使用kf-前缀避免冲突 */
+        .kf-custom-carousel {
+            width: 100%;
+            height: 500px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .kf-carousel-item {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .kf-carousel-content {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        
+        .kf-carousel-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+        
+        .kf-carousel-item:hover .kf-carousel-img {
+            transform: scale(1.05);
+        }
+        
+        .kf-carousel-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 100%);
+            z-index: 1;
+        }
+        
+        .kf-carousel-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 40px;
+            color: #fff;
+            z-index: 2;
+            transform: translateY(0);
+            transition: transform 0.5s ease;
+            text-align: center;
+        }
+        
+        .kf-carousel-item:hover .kf-carousel-caption {
+            transform: translateY(-10px);
+        }
+        
+        .kf-carousel-title {
+            font-size: 32px;
+            margin-bottom: 15px;
+            font-weight: bold;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            position: relative;
+            display: inline-block;
+            font-family: "KaiTi", "FangSong", serif;
+            letter-spacing: 2px;
+        }
+        
+        .kf-carousel-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+        
+        .kf-carousel-item:hover .kf-carousel-title::after {
+            width: 100%;
+        }
+        
+        .kf-carousel-desc {
+            font-size: 18px;
+            margin-bottom: 25px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            font-family: "SimSun", serif;
+        }
+        
+        .kf-carousel-btn-container {
+            margin-top: 20px;
+        }
+        
+        .kf-carousel-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+        }
+        
+        .kf-carousel-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+        
+        .kf-carousel-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 100%);
+            transition: all 0.5s ease;
+            z-index: -1;
+        }
+        
+        .kf-carousel-btn:hover::after {
+            left: 100%;
+        }
+        
+        .kf-carousel-corner {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            z-index: 3;
+            transition: all 0.5s ease;
+        }
+        
+        .kf-carousel-corner-tl {
+            top: 15px;
+            left: 15px;
+            border-top: 3px solid rgba(255, 255, 255, 0.8);
+            border-left: 3px solid rgba(255, 255, 255, 0.8);
+        }
+        
+        .kf-carousel-corner-tr {
+            top: 15px;
+            right: 15px;
+            border-top: 3px solid rgba(255, 255, 255, 0.8);
+            border-right: 3px solid rgba(255, 255, 255, 0.8);
+        }
+        
+        .kf-carousel-corner-bl {
+            bottom: 15px;
+            left: 15px;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.8);
+            border-left: 3px solid rgba(255, 255, 255, 0.8);
+        }
+        
+        .kf-carousel-corner-br {
+            bottom: 15px;
+            right: 15px;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.8);
+            border-right: 3px solid rgba(255, 255, 255, 0.8);
+        }
+        
+        .kf-carousel-item:hover .kf-carousel-corner-tl {
+            transform: translate(-5px, -5px);
+        }
+        
+        .kf-carousel-item:hover .kf-carousel-corner-tr {
+            transform: translate(5px, -5px);
+        }
+        
+        .kf-carousel-item:hover .kf-carousel-corner-bl {
+            transform: translate(-5px, 5px);
+        }
+        
+        .kf-carousel-item:hover .kf-carousel-corner-br {
+            transform: translate(5px, 5px);
+        }
+        
+        /* 自定义Element UI轮播图控件样式 */
+        .kf-custom-carousel .el-carousel__arrow {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            width: 40px;
+            height: 40px;
+        }
+        
+        .kf-custom-carousel .el-carousel__arrow:hover {
+            background-color: var(--primary-color);
+        }
+        
+        .kf-custom-carousel .el-carousel__indicators {
+            bottom: 20px;
+        }
+        
+        .kf-custom-carousel .el-carousel__indicator--horizontal .el-carousel__button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+        
+        .kf-custom-carousel .el-carousel__indicator.is-active .el-carousel__button {
+            background-color: var(--primary-color);
+            transform: scale(1.2);
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .kf-carousel-title {
+                font-size: 24px;
+            }
+            
+            .kf-carousel-desc {
+                font-size: 16px;
+            }
+            
+            .kf-carousel-caption {
+                padding: 20px;
+            }
+            
+            .kf-carousel-btn {
+                padding: 10px 20px;
+            }
+            
+            .kf-custom-carousel {
+                height: 400px;
+            }
+        }
+        
+        .city-intro {
+            background: rgba(255, 252, 245, 0.95);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 40px 0;
+            position: relative;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+        }
+        
+        .city-intro::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('img/paper-texture.png');
+            opacity: 0.1;
+            z-index: -1;
+            border-radius: 12px;
+        }
+        
+        .city-intro h2 {
+            color: var(--primary-color);
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .city-intro h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 2px;
+            background: var(--gold-gradient);
+        }
+        
+        .city-intro p {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            text-indent: 2em;
+            color: var(--text-color-dark);
+        }
+        
+        .city-intro .highlight {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .city-facts {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .city-fact {
+            flex: 0 0 calc(25% - 20px);
+            text-align: center;
+            padding: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .city-fact::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.2;
+            z-index: -1;
+        }
+        
+        .city-fact h3 {
+            font-size: 18px;
+            color: var(--accent-color);
+            margin-bottom: 8px;
+        }
+        
+        .city-fact p {
+            font-size: 14px;
+            margin: 0;
+            text-indent: 0;
+        }
+        
+        .section-intro {
+            max-width: 800px;
+            margin: 0 auto 30px;
+            text-align: center;
+            color: var(--text-color-dark);
+            font-size: 16px;
+            line-height: 1.8;
+        }
+        
+        .card {
+            transform: translateY(0);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('img/paper-texture.png');
+            opacity: 0.05;
+            z-index: -1;
+            border-radius: 8px;
+            transition: opacity 0.4s ease;
+        }
+        
+        .card:hover::before {
+            opacity: 0.1;
+        }
+        
+        .card-img {
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+        
+        .card:hover .card-img {
+            transform: scale(1.05);
+        }
+        
+        .video-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            height: 500px;
+            background-image: url('img/福建文旅图片.png');
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            border: 1px solid var(--border-color);
+        }
+        
+        .video-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .video-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.3) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .video-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            pointer-events: none;
+            z-index: 2;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .note-container {
+            background: rgba(255, 252, 245, 0.9);
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 50px;
+            text-align: center;
+            position: relative;
+            border: 1px solid var(--border-color);
+        }
+        
+        .note-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('img/paper-texture.png');
+            opacity: 0.1;
+            z-index: -1;
+            border-radius: 12px;
+        }
+        
+        .note-text {
+            font-size: 16px;
+            line-height: 1.8;
+            color: var(--text-color-dark);
+            font-style: italic;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .city-fact {
+                flex: 0 0 calc(50% - 20px);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .city-intro {
+                padding: 20px;
+            }
+            
+            .city-fact {
+                flex: 0 0 100%;
+            }
+        }
+        
+        /* 视频遮罩层样式增强 */
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+            border-radius: 12px;
+            backdrop-filter: blur(2px);
+            opacity: 1;
+        }
+        
+        .video-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('img/paper-texture.png');
+            opacity: 0.1;
+            z-index: -1;
+            border-radius: 12px;
+        }
+        
+        .video-overlay::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px solid var(--secondary-color);
+            border-radius: 8px;
+            opacity: 0.6;
+            pointer-events: none;
+            background-image: none;
+        }
+        
+        /* 添加中国风边框角落装饰 */
+        .video-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('img/paper-texture.png');
+            opacity: 0.1;
+            z-index: -1;
+            border-radius: 12px;
+        }
+        
+        /* 左上角装饰 */
+        .video-overlay .corner-tl {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 30px;
+            height: 30px;
+            border-top: 3px solid var(--secondary-color);
+            border-left: 3px solid var(--secondary-color);
+            opacity: 0.8;
+            z-index: 3;
+        }
+        
+        /* 右上角装饰 */
+        .video-overlay .corner-tr {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 30px;
+            height: 30px;
+            border-top: 3px solid var(--secondary-color);
+            border-right: 3px solid var(--secondary-color);
+            opacity: 0.8;
+            z-index: 3;
+        }
+        
+        /* 左下角装饰 */
+        .video-overlay .corner-bl {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            width: 30px;
+            height: 30px;
+            border-bottom: 3px solid var(--secondary-color);
+            border-left: 3px solid var(--secondary-color);
+            opacity: 0.8;
+            z-index: 3;
+        }
+        
+        /* 右下角装饰 */
+        .video-overlay .corner-br {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 30px;
+            height: 30px;
+            border-bottom: 3px solid var(--secondary-color);
+            border-right: 3px solid var(--secondary-color);
+            opacity: 0.8;
+            z-index: 3;
+        }
+        
+        .video-overlay:hover {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .video-overlay-content {
+            text-align: center;
+            color: white;
+            transform: translateY(0);
+            transition: transform 0.5s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .video-overlay:hover .video-overlay-content {
+            transform: translateY(-10px);
+        }
+        
+        .video-play-icon {
+            width: 80px;
+            height: 80px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 2px solid var(--secondary-color);
+        }
+        
+        .video-play-icon::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 55%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            border-left: 25px solid white;
+        }
+        
+        .video-overlay:hover .video-play-icon {
+            transform: scale(1.1);
+            background-color: var(--secondary-color);
+        }
+        
+        .video-play-icon::after {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 215, 0, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            70% {
+                transform: scale(1.1);
+                opacity: 0.2;
+            }
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+        
+        .video-overlay-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            position: relative;
+            display: inline-block;
+            font-family: "KaiTi", "FangSong", serif;
+            letter-spacing: 2px;
+        }
+        
+        .video-overlay-title::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--secondary-color);
+            transition: width 0.3s ease;
+        }
+        
+        .video-overlay:hover .video-overlay-title::after {
+            width: 100%;
+        }
+        
+        .video-overlay-desc {
+            font-size: 16px;
+            opacity: 0.8;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            font-family: "SimSun", serif;
+        }
+        
+        .bilibili-video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .bilibili-video-container iframe {
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .video-container {
+                height: 300px;
+            }
+            
+            .video-play-icon {
+                width: 60px;
+                height: 60px;
+                margin-bottom: 15px;
+            }
+            
+            .video-play-icon::before {
+                border-top: 10px solid transparent;
+                border-bottom: 10px solid transparent;
+                border-left: 18px solid white;
+            }
+            
+            .video-overlay-title {
+                font-size: 20px;
+            }
+            
+            .video-overlay-desc {
+                font-size: 14px;
+            }
+            
+            .bilibili-video-container iframe {
+                height: 300px;
+            }
+        }
+        
+        /* 视频播放涟漪效果 */
+        .video-ripple-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0;
+            height: 0;
+            background: rgba(255, 215, 0, 0.2);
+            border-radius: 50%;
+            z-index: 4;
+            animation: videoRipple 1s ease-out forwards;
+        }
+        
+        @keyframes videoRipple {
+            0% {
+                width: 0;
+                height: 0;
+                opacity: 0.8;
+            }
+            100% {
+                width: 200%;
+                height: 200%;
+                opacity: 0;
+            }
+        }
+        
+        /* 角落装饰动画 */
+        .video-overlay .corner-tl,
+        .video-overlay .corner-tr,
+        .video-overlay .corner-bl,
+        .video-overlay .corner-br {
+            transition: all 0.5s ease;
+        }
+        
+        .video-overlay:hover .corner-tl {
+            transform: translate(-3px, -3px);
+        }
+        
+        .video-overlay:hover .corner-tr {
+            transform: translate(3px, -3px);
+        }
+        
+        .video-overlay:hover .corner-bl {
+            transform: translate(-3px, 3px);
+        }
+        
+        .video-overlay:hover .corner-br {
+            transform: translate(3px, 3px);
+        }
+        
+        /* 添加水墨装饰 */
+        .video-overlay .ink-decoration {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-image: url('img/ink-splash.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.1;
+            z-index: 1;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        
+        .video-overlay .ink-top-right {
+            top: 10px;
+            right: 10px;
+            transform: rotate(45deg) scale(0.6);
+        }
+        
+        .video-overlay .ink-bottom-left {
+            bottom: 10px;
+            left: 10px;
+            transform: rotate(-135deg) scale(0.6);
+        }
+        
+        .video-overlay:hover .ink-decoration {
+            opacity: 0.15;
+        }
+    </style>
+</head>
+<body>
+    <div id="app" v-cloak>
+        <!-- 国风背景图案 -->
+        <div class="chinese-pattern"></div>
+        
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="container header-inner">
+                <div class="logo">
+                    <img src="img/logo.png" alt="福建文旅">
+                    <div class="logo-text">八闽福建</div>
+                </div>
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="index.html" class="nav-link active">首页</a></li>
+                        <li class="nav-item"><a href="food.html" class="nav-link">景点浏览</a></li>
+                        <li class="nav-item"><a href="scenic.html" class="nav-link">非遗探索</a></li>
+                        <li class="nav-item"><a href="activity.html" class="nav-link">活动资讯</a></li>
+                        <li class="nav-item"><a href="message.html" class="nav-link">留言互动</a></li>
+                        <li class="nav-item"><a href="personal.html" class="nav-link">个人中心</a></li>
+                    </ul>
+                    <div class="menu-toggle">
+                        <i class="el-icon-menu"></i>
+                    </div>
+                </nav>
+            </div>
+        </header>
+        
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 轮播图 -->
+            <section class="container">
+                <div class="hero-section">
+                    <div class="carousel">
+                        <el-carousel :interval="4000" height="500px" indicator-position="outside" arrow="always" class="kf-custom-carousel">
+                            <el-carousel-item v-for="item in imgadvlist" :key="item.id" class="kf-carousel-item">
+                                <div class="kf-carousel-content">
+                                    <div class="kf-carousel-overlay"></div>
+                                    <div class="kf-carousel-caption">
+                                        <h3 class="kf-carousel-title">闽于山水 · 福至如归</h3>
+                                        <p class="kf-carousel-desc">“瓯居海中,闽在海中,其西北有山。一日闽中山在海中。”—《山海经·海内南经》</p>
+                                        <div class="kf-carousel-btn-container">
+                                            <a href="food.html" class="kf-carousel-btn">探索景点</a>
+                                        </div>
+                                    </div>
+                                    <div class="kf-carousel-corner kf-carousel-corner-tl"></div>
+                                    <div class="kf-carousel-corner kf-carousel-corner-tr"></div>
+                                    <div class="kf-carousel-corner kf-carousel-corner-bl"></div>
+                                    <div class="kf-carousel-corner kf-carousel-corner-br"></div>
+                                    <img :src="'/upload/'+item.filename" alt="福建风光" class="kf-carousel-img">
+                                </div>
+                            </el-carousel-item>
+                        </el-carousel>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 福建城市介绍 -->
+            <section class="container">
+                <div class="city-intro">
+                    <h2>闽于山水 · 福至如归</h2>
+                    <p>福建，简称“闽”。省会福州。东望台湾，北接浙江，西邻江西，南连广东。形状像一片芭蕉叶。有武夷山脉的丹霞奇峰、平潭岛的“蓝眼泪”荧光海、闽江口的湿地白鹭、土楼群的“外星堡垒”。从“海上丝绸之路”的起点泉州，到“中国茶都”武夷山，从“沙县小吃宇宙总部”三明，到“互联网新贵”福州，过去现在和未来在这聚集。</p>
+                    <p>这片土地见证了<span class="highlight">闽越文明的薪火相传与海洋文化的璀璨辉煌</span>，留下了数不胜数的历史遗迹与文化瑰宝。福建依山襟海、城景相依，孕育出 “山海相拥、闽台同根、文脉绵延”的独特气象，境内遍布千年古厝、客家土楼、丝路古港与书院遗韵 ”，层层积淀着跨越千载、生生不息的闽地文脉与海洋印记。</p>
+                    <p>如今的福建，既有<span class="highlight">鼓浪屿、三坊七巷、福建土楼</span>等世界遗产，也有<span class="highlight">泉州古城、湄洲妈祖、朱子故里</span>等传承闽韵的文化胜地。这里的<span class="highlight">寿山石雕、德化白瓷、闽派剪纸</span>等传统工艺享誉中外<span class="highlight">佛跳墙、沙茶面、土楼土鸡</span>等特色美食令人回味。每年的泉州海丝文化节、武夷山旅游节吸引着众多游客前来体验。</p>
+                    
+                    <div class="city-facts">
+                        <div class="city-fact">
+                            <h3>历史底蕴</h3>
+                            <p>海滨邹鲁</p>
+                            <p>17000年历史</p>
+                        </div>
+                        <div class="city-fact">
+                            <h3>文化特色</h3>
+                            <p>八闽文脉核心</p>
+                            <p>南戏传承之乡</p>
+                        </div>
+                        <div class="city-fact">
+                            <h3>地理位置</h3>
+                            <p>中国东南沿海</p>
+                            <p>台湾西岸</p>
+                        </div>
+                        <div class="city-fact">
+                            <h3>气候特点</h3>
+                            <p>亚热带季风气候</p>
+                            <p>温暖潮湿</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 文化文章推荐 -->
+            <section class="container">
+                <div class="page-title">
+                    <h1>福建非遗精选</h1>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="section-intro">
+                            <p>在福建这片八闽山海，您将领略到悠远的海洋文脉与多元交融的文化瑰宝。这里是海上丝绸之路核心区，拥有多项世界遗产与璀璨非遗，山海相依、闽韵流长，让我们一同感受福建的独特魅力。福建风景名胜得天独厚，底蕴厚重，既有山海相拥的壮阔，又有千年古城的温婉。从客家土楼到三坊七巷，从鼓浪屿到武夷山，每一处景致都承载着福建的历史与风华。</p>
+                            <a href="scenic.html" class="card-link">了解更多</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4" v-for="(articles,i) in articleslist" v-if="i<3">
+                        <div class="card">
+                            <img :src="articles.filename" class="card-img" alt="文章图片">
+                            <div class="card-content">
+                                <h3 class="card-title">{{articles.title}}</h3>
+                                <p class="card-text" v-html="getTruncatedContent(articles.content, 100)"></p>
+                                <p class="card-meta">发布时间: {{formatDate(articles.savetime)}}</p>
+                                <a :href="'articlesdetails.html?id='+articles.id" class="card-link">阅读全文</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <div class="section-divider">
+                <span class="divider-icon"></span>
+            </div>
+            
+            <!-- 视频介绍 -->
+            <section class="container">
+                <div class="page-title">
+                    <h1>福建省宣传片</h1>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="video-container" id="videoContainer">
+                            <div class="video-overlay" id="videoOverlay">
+                                <div class="corner-tl"></div>
+                                <div class="corner-tr"></div>
+                                <div class="corner-bl"></div>
+                                <div class="corner-br"></div>
+                                <div class="ink-decoration ink-top-right"></div>
+                                <div class="ink-decoration ink-bottom-left"></div>
+                                <div class="video-overlay-content">
+                                    <div class="video-play-icon"></div>
+                                    <h3 class="video-overlay-title"></h3>
+                                    <p class="video-overlay-desc">点击观看八闽福建风华</p>
+                                </div>
+                            </div>
+                            <div class="bilibili-video-container" id="bilibiliContainer" style="display: none;">
+                                <iframe src="//player.bilibili.com/player.html?bvid=BV1E4411c769&page=1&high_quality=1&danmaku=0&t=0"
+                                    allowfullscreen="allowfullscreen" width="100%" height="500" 
+                                    scrolling="no" frameborder="0" sandbox="allow-top-navigation allow-same-origin allow-forms allow-scripts"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <div class="section-divider">
+                <span class="divider-icon"></span>
+            </div>
+            
+            <!-- 美食推荐 -->
+            <section class="container">
+                <div class="page-title">
+                    <h1>福建景点浏览精选</h1>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="section-intro">
+                            <p>福建风景名胜得天独厚，底蕴厚重，既有山海相拥的壮阔，又有千年古城的温婉。从客家土楼到三坊七巷，从鼓浪屿到武夷山，每一处景致都承载着福建的历史与风华。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3" v-for="(painting,i) in paintinglist" v-if="i<4">
+                        <div class="card">
+                            <img :src="painting.filename" class="card-img" alt="美食图片">
+                            <div class="card-content">
+                                <h3 class="card-title">{{painting.name}}</h3>
+                                <p class="card-text" v-html="getTruncatedContent(painting.content, 60)"></p>
+                                <a :href="'paintingdetails.html?id='+painting.id" class="card-link">查看详情</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <div class="section-divider">
+                <span class="divider-icon"></span>
+            </div>
+            
+            <!-- 活动资讯 -->
+            <section class="container">
+                <div class="page-title">
+                    <h1>近期活动资讯</h1>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="section-intro">
+                            <p>福建四季文旅节庆精彩纷呈，妈祖文化、闽南文化、客家文化、海丝文化等特色活动轮番上演，让游客在沉浸式体验中感受闽地独特文脉底蕴。关注最新节庆盛事，领略福建山海交融、传统与现代共生的独特魅力。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6" v-for="(address,i) in addresslist" v-if="i<2">
+                        <div class="card">
+                            <div class="card-content">
+                                <h3 class="card-title">{{address.title}}</h3>
+                                <p class="card-text" v-html="getTruncatedContent(address.content, 150)"></p>
+                                <p class="card-meta">活动时间: {{formatDate(address.savetime)}}</p>
+                                <a :href="'addressdetails.html?id='+address.id" class="card-link">查看详情</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- 网站简介 -->
+            <section class="container">
+                <div class="note-container">
+                    <p class="note-text">{{about.category}}</p>
+                </div>
+            </section>
+        </main>
+        
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-column">
+                        <h3 class="footer-title">关于我们</h3>
+                        <p class="footer-text">八闽福建深耕本土文旅资源，积极推广闽越文化、特色美食与山海风光，为广大游客提供全方位、高品质的福建旅游信息服务</p>
+                    </div>
+                    <div class="footer-column">
+                        <h3 class="footer-title">联系方式</h3>
+                        <p class="footer-text">地址：福建省厦门市翔安区</p>
+                        <p class="footer-text">电话：17262016429</p>
+                        <p class="footer-text">邮箱：997463290@qq.com</p>
+                    </div>
+                    <div class="footer-column">
+                        <h3 class="footer-title">快速链接</h3>
+                        <ul class="footer-links">
+                            <li class="footer-link"><a href="index.html">首页</a></li>
+                            <li class="footer-link"><a href="food.html">景点浏览</a></li>
+                            <li class="footer-link"><a href="scenic.html">非遗探索</a></li>
+                            <li class="footer-link"><a href="activity.html">活动资讯</a></li>
+                            <li class="footer-link"><a href="message.html">留言互动</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; Copyright &copy; {{ currentYear }} 八闽福建 <a target="_blank" href="/adminPage/login.html">后台管理</a></p>
+                    <a class="to-top-link"><img src="img/to-top.png" class="to-top" alt="回到顶部"/></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script src="../js/axios/vue.js"></script>
+    <script src="../js/axios/axios.min.js"></script>
+    <script src="../js/axios/qs.js"></script>
+    <script src="../js/axios/getUrlParams.js"></script>
+    <script src="../js/jquery/jquery-3.2.1.min.js"></script>
+    <script src="../js/layer/layer.js"></script>
+    <script src="../js/layui/layui.js"></script>
+    <script src="../js/axios/element_ui.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        var qs = Qs
+        var vmm = new Vue({
+            el: "#app",
+            data: {
+                currentYear: new Date().getFullYear(),
+                imgadvlist: [{
+                    filename: "no-img.png"
+                }],
+                articleslist: [{
+                    filename: "no-img.png"
+                }],
+                paintinglist: [],
+                addresslist: [],
+                about: {},
+
+                dialogVisible: false,
+                dialogContent: "",
+
+                key: "",
+                key1: "",
+
+                pageNum: 1,
+                pageSize: 4,
+            },
+            mounted() {
+                this.getimgadvlist()  //获取轮播图列表
+                this.getarticleslist() //获取文化文章列表
+                this.getpaintinglist() //获取美食列表
+                this.getaddresslist() //获取活动资讯列表
+                this.getabout() //网站信息
+                
+                // 添加视频点击播放功能
+                const videoOverlay = document.getElementById('videoOverlay');
+                const bilibiliContainer = document.getElementById('bilibiliContainer');
+                const videoContainer = document.getElementById('videoContainer');
+                
+                if (videoOverlay && bilibiliContainer) {
+                    videoOverlay.addEventListener('click', function() {
+                        videoOverlay.style.opacity = '0';
+                        setTimeout(() => {
+                            videoOverlay.style.display = 'none';
+                            bilibiliContainer.style.display = 'block';
+                            setTimeout(() => {
+                                bilibiliContainer.style.opacity = '1';
+                            }, 10);
+                        }, 300);
+                        
+                        // 添加视频播放时的特效
+                        const ripple = document.createElement('div');
+                        ripple.classList.add('video-ripple-effect');
+                        videoContainer.appendChild(ripple);
+                        
+                        setTimeout(() => {
+                            ripple.remove();
+                        }, 1000);
+                    });
+                    
+                    // 添加鼠标悬停效果
+                    videoOverlay.addEventListener('mouseenter', function() {
+                        const playIcon = this.querySelector('.video-play-icon');
+                        if (playIcon) {
+                            playIcon.style.transform = 'scale(1.1)';
+                        }
+                    });
+                    
+                    videoOverlay.addEventListener('mouseleave', function() {
+                        const playIcon = this.querySelector('.video-play-icon');
+                        if (playIcon) {
+                            playIcon.style.transform = 'scale(1)';
+                        }
+                    });
+                }
+                
+                // 监听滚动事件，添加动画效果
+                window.addEventListener('scroll', this.handleScroll);
+                
+                // 初始化回到顶部按钮
+                const toTopBtn = document.querySelector('.to-top');
+                if (toTopBtn) {
+                    window.addEventListener('scroll', function() {
+                        if (window.pageYOffset > 300) {
+                            toTopBtn.classList.add('visible');
+                        } else {
+                            toTopBtn.classList.remove('visible');
+                        }
+                    });
+                    
+                    document.querySelector('.to-top-link').addEventListener('click', function() {
+                        window.scrollTo({
+                            top: 0,
+                            behavior: 'smooth'
+                        });
+                    });
+                }
+            },
+            methods: {
+                getabout() {
+                    axios.post('/about/get')
+                        .then(res => {
+                            console.log('关于我们接口返回:', res.data);
+                            if (res.data.code === 0) {
+                                this.about = res.data.data;
+                            } else {
+                                console.error('获取关于我们信息失败:', res.data.msg);
+                                this.about = { content: '欢迎来到八闽福建！' };
+                            }
+                        })
+                        .catch(err => {
+                            console.error('获取关于我们信息出错:', err);
+                            // 设置默认内容
+                            this.about = { content: '欢迎来到八闽福建！' };
+                        });
+                },
+                //获取轮播图列表
+                getimgadvlist() {
+                    axios.post('/admin/imgadvList', qs.stringify({
+                        pageNum: 1,
+                        pageSize: 5
+                    })).then(response => {
+                        this.imgadvlist = response.data.list
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                },
+                //获取文化文章列表
+                getarticleslist() {
+                    axios.post('/articles/list', qs.stringify({
+                        pageNum: 1,
+                        pageSize: 3
+                    })).then(response => {
+                        this.articleslist = response.data.list
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                },
+                //获取美食列表
+                getpaintinglist() {
+                    axios.post('/painting/list', qs.stringify({
+                        isshow: "yes",
+                        pageNum: 1,
+                        pageSize: 4
+                    })).then(response => {
+                        this.paintinglist = response.data.list
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                },
+                //获取活动资讯列表
+                getaddresslist() {
+                    axios.post('/address/list', qs.stringify({
+                        pageNum: 1,
+                        pageSize: 2
+                    })).then(response => {
+                        this.addresslist = response.data.list
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                },
+                //截取内容
+                getTruncatedContent(content, length) {
+                    if (!content) return '';
+                    // 移除HTML标签
+                    let plainText = content.replace(/<[^>]+>/g, '');
+                    if (plainText.length <= length) return plainText;
+                    return plainText.substring(0, length) + '...';
+                },
+                //格式化日期
+                formatDate(timestamp) {
+                    if (!timestamp) return '';
+                    
+                    // 检查timestamp是否为字符串，如果是则尝试转换
+                    if (typeof timestamp === 'string') {
+                        // 如果是日期字符串格式(如：2023-01-01 12:00:00)，直接返回
+                        if (timestamp.includes('-')) {
+                            return timestamp;
+                        }
+                        // 尝试将字符串转为数字
+                        timestamp = Number(timestamp);
+                    }
+                    
+                    // 检查timestamp是否为有效数字
+                    if (isNaN(timestamp) || timestamp <= 0) {
+                        return '未知时间';
+                    }
+                    
+                    // 检查时间戳长度，如果是10位（秒），则转为13位（毫秒）
+                    if (timestamp.toString().length === 10) {
+                        timestamp = timestamp * 1000;
+                    }
+                    
+                    const date = new Date(timestamp);
+                    
+                    // 检查日期是否有效
+                    if (date.getFullYear() < 2000) {
+                        return '未知时间';
+                    }
+                    
+                    return date.getFullYear() + '-' + 
+                           (date.getMonth() + 1).toString().padStart(2, '0') + '-' + 
+                           date.getDate().toString().padStart(2, '0') + ' ' +
+                           date.getHours().toString().padStart(2, '0') + ':' +
+                           date.getMinutes().toString().padStart(2, '0');
+                },
+                // 处理滚动动画效果
+                handleScroll() {
+                    const scrollElements = document.querySelectorAll('.card, .city-intro, .video-container, .note-container');
+                    
+                    scrollElements.forEach(element => {
+                        const elementTop = element.getBoundingClientRect().top;
+                        const elementVisible = 150;
+                        
+                        if (elementTop < window.innerHeight - elementVisible) {
+                            element.classList.add('scroll-reveal');
+                            element.classList.add('visible');
+                        }
+                    });
+                    
+                    // 添加水墨涟漪效果
+                    if (Math.random() > 0.99) {
+                        this.createRipple();
+                    }
+                },
+                // 创建水墨涟漪效果
+                createRipple() {
+                    const ripple = document.createElement('div');
+                    ripple.classList.add('ripple-effect');
+                    
+                    const size = Math.random() * 100 + 100;
+                    const x = Math.random() * window.innerWidth;
+                    const y = Math.random() * window.innerHeight;
+                    
+                    ripple.style.width = size + 'px';
+                    ripple.style.height = size + 'px';
+                    ripple.style.left = x + 'px';
+                    ripple.style.top = y + 'px';
+                    
+                    document.body.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 1500);
+                }
+            }
+        })
+    </script>
+</body>
+</html> 

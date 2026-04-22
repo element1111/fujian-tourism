@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>八闽福建 - 轮播广告管理</title>
+    <!-- 网站图标 -->
+    <link rel="shortcut icon" type="image/png" href="../Tourism/img/logo.png">
+    <link rel="stylesheet" href="assets/css/template-admin.css"/>
+</head>
+<body class="list-page">
+
+<div class="kf-page-container" id="app" v-cloak>
+    <!-- 页面标题区域 -->
+    <div class="kf-page-header">
+        <div class="kf-page-title">
+            <h2>轮播广告管理</h2>
+        </div>
+        <div class="kf-search-area">
+            <div class="kf-search-box">
+                <input class="kf-search-input" v-model="key" type="text" placeholder="请输入关键词搜索..." id="text-input">
+            </div>
+            <button class="kf-btn kf-btn-icon" @click="getimgadvlist()">
+                <i class="el-icon-search"></i>
+            </button>
+            <button class="kf-btn" @click="showAddDialog">
+                <i class="el-icon-plus"></i> 新增轮播图
+            </button>
+        </div>
+    </div>
+    
+    <!-- 内容卡片 -->
+    <div class="kf-card">
+        <div class="kf-card-header">
+            <h3>轮播图列表</h3>
+        </div>
+        <div class="kf-card-body">
+            <div class="kf-table-container">
+                <div class="kf-table-responsive">
+                    <el-table :data="imgadvlist" border style="width: 100%">
+                        <el-table-column label="图片" align="center">
+                            <template slot-scope="scope">
+                                <img :src="['../upload/'+scope.row.filename]" class="kf-image" style="width: 400px; height: 132px;">
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="url" label="链接地址" align="center"></el-table-column>
+                        <el-table-column label="操作" align="center" width="240">
+                            <template slot-scope="scope">
+                                <el-button @click="showEditDialog(scope.row)" type="text" size="small">
+                                    <i class="el-icon-edit"></i> 修改
+                                </el-button>
+                                <el-button @click="del(scope.row.id)" type="text" size="small">
+                                    <i class="el-icon-delete"></i> 删除
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <!-- 分页区域 -->
+            <div class="kf-pagination" id="demo1"></div>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <div class="kf-footer">
+        <p>八闽福建 © {{ currentYear }} 版权所有</p>
+    </div>
+    
+    <!-- 新增轮播图弹窗 -->
+    <el-dialog
+        title="新增轮播图"
+        :visible.sync="addDialogVisible"
+        width="50%"
+        :before-close="handleClose"
+        custom-class="kf-dialog">
+        <div class="kf-form-container">
+            <el-form :model="newImgadv" label-width="80px" class="kf-form">
+                <el-form-item label="图片">
+                    <el-upload
+                        ref="upload"
+                        action=""
+                        list-type="picture-card"
+                        :on-preview="handlePictureCardPreview"
+                        :on-remove="handleRemove"
+                        :on-change="UploadImage"
+                        :file-list="fileList"
+                        :limit="1"
+                        multiple
+                        :class="{disabled:uploadDisabled}"
+                        :auto-upload="false">
+                        <i class="el-icon-plus"></i>
+                    </el-upload>
+                    <el-dialog :visible.sync="dialogVisible">
+                        <img width="100%" :src="dialogImageUrl" alt="图片扩大"/>
+                    </el-dialog>
+                </el-form-item>
+                
+                <el-form-item label="链接地址">
+                    <el-input v-model="newImgadv.url" placeholder="请输入链接地址"></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="addDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addImgadv">确 定</el-button>
+        </span>
+    </el-dialog>
+    
+    <!-- 修改轮播图弹窗 -->
+    <el-dialog
+        title="修改轮播图"
+        :visible.sync="editDialogVisible"
+        width="50%"
+        :before-close="handleClose"
+        custom-class="kf-dialog">
+        <div class="kf-form-container">
+            <el-form :model="editImgadv" label-width="80px" class="kf-form">
+                <el-form-item label="图片">
+                    <el-upload
+                        ref="editUpload"
+                        action=""
+                        list-type="picture-card"
+                        :on-preview="handlePictureCardPreview"
+                        :on-remove="handleRemove"
+                        :on-change="UploadEditImage"
+                        :file-list="editFileList"
+                        :limit="1"
+                        multiple
+                        :class="{disabled:editUploadDisabled}"
+                        :auto-upload="false">
+                        <i class="el-icon-plus"></i>
+                    </el-upload>
+                    <el-dialog :visible.sync="dialogVisible">
+                        <img width="100%" :src="dialogImageUrl" alt="图片扩大"/>
+                    </el-dialog>
+                </el-form-item>
+                
+                <el-form-item label="链接地址">
+                    <el-input v-model="editImgadv.url" placeholder="请输入链接地址"></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="editDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="updateImgadv">确 定</el-button>
+        </span>
+    </el-dialog>
+</div>
+
+<script src="assets/js/template-admin.js"></script>
+<script type="text/javascript">
+	var qs = Qs
+	var pageNum = UrlParam.paramValues("pageNum") == null ? 1 : UrlParam.paramValues("pageNum").toString()
+	var vmm = new Vue({
+		el: '#app',
+		data: {
+			currentYear: new Date().getFullYear(),
+			imgadvlist: [],
+			key: '',
+			pageNum: pageNum,
+			pageSize: 3,
+            
+            // 新增轮播图相关数据
+            addDialogVisible: false,
+            fileList: [],
+            uploadDisabled: false,
+            dialogVisible: false,
+            dialogImageUrl: '',
+            newImgadv: {
+                filename: '',
+                url: ''
+            },
+            
+            // 修改轮播图相关数据
+            editDialogVisible: false,
+            editFileList: [],
+            editUploadDisabled: false,
+            editImgadv: {
+                id: '',
+                filename: '',
+                url: ''
+            }
+		},
+		mounted() {
+			this.getimgadvlist()
+		},
+		methods: {
+			//当前轮播图列表
+			getimgadvlist() {
+				axios.post('/admin/imgadvList', qs.stringify({
+					key: this.key,
+					pageSize: this.pageSize
+				})).then(response => {
+					layui.use(['laypage', 'layer'], function () {
+						var laypage = layui.laypage
+							, layer = layui.layer;
+						//总页数大于页码总数
+						laypage.render({
+							elem: 'demo1'
+							, theme: "#c8161d"
+							, curr: vmm.pageNum
+							, limit: vmm.pageSize
+							, count: response.data.list.length //数据总数
+							, jump: function (obj, first) {
+								vmm.pageNum = obj.curr
+								vmm.current_page(obj.curr, vmm.pageSize)
+								console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+							}
+						});
+					});
+				}).catch(error => {
+					console.log(error)
+				})
+			},
+
+			current_page(page, pageSize) {
+				axios.post('/admin/imgadvList', qs.stringify({
+					key: this.key,
+					pageNum: page,
+					pageSize: pageSize,
+				})).then(response => {
+					this.imgadvlist = response.data.pageInfo.list
+
+				}).catch(error => {
+					console.log(error)
+				})
+			},
+
+			del(id) {
+				this.$confirm('确定要删除此轮播图吗？', '删除确认', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    customClass: 'kf-confirm-dialog'
+                }).then(() => {
+				    axios.post("/admin/imgadvDel", qs.stringify({
+					    id: id,
+				    })).then(response => {
+					    this.$message({
+                            message: '删除成功！',
+                            type: 'success'
+                        });
+					    this.getimgadvlist()
+				    }).catch(error => {
+					    this.$message.error('删除失败，请重试');
+                        console.log(error)
+				    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+			},
+            
+            // 新增轮播图相关方法
+            showAddDialog() {
+                this.addDialogVisible = true;
+                // 重置表单
+                this.newImgadv = {
+                    filename: '',
+                    url: ''
+                };
+                this.fileList = [];
+                this.uploadDisabled = false;
+            },
+            
+            // 修改轮播图相关方法
+            showEditDialog(row) {
+                this.editDialogVisible = true;
+                this.editImgadv = {
+                    id: row.id,
+                    filename: row.filename,
+                    url: row.url
+                };
+                
+                // 设置文件列表
+                this.editFileList = [{
+                    name: row.filename,
+                    url: '../upload/' + row.filename
+                }];
+                this.editUploadDisabled = true;
+            },
+            
+            handleClose(done) {
+                this.$confirm('确认关闭？未保存的数据将会丢失')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => {});
+            },
+            
+            //上传图片的方法
+            UploadImage(file, fileList) {
+                if (fileList.length >= 1) {
+                    // 上传一个后，后面添加隐藏
+                    this.uploadDisabled = true;
+                }
+                let fd = new FormData();
+                fd.append('file', file.raw); //传给后台接收的名字 file
+                axios.post('/admin/uploadImg', fd, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(response => {
+                    this.newImgadv.filename = response.data.data.src;
+                });
+            },
+            
+            //修改时上传图片的方法
+            UploadEditImage(file, fileList) {
+                if (fileList.length >= 1) {
+                    // 上传一个后，后面添加隐藏
+                    this.editUploadDisabled = true;
+                }
+                let fd = new FormData();
+                fd.append('file', file.raw); //传给后台接收的名字 file
+                axios.post('/admin/uploadImg', fd, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(response => {
+                    this.editImgadv.filename = response.data.data.src;
+                });
+            },
+            
+            //预览图片功能
+            handlePictureCardPreview(file) {
+                this.dialogVisible = true;
+                this.dialogImageUrl = file.url;
+            },
+            
+            //移除展示图片功能
+            handleRemove(file, fileList) {
+                //添加+号
+                if (fileList.length === 0) {
+                    this.uploadDisabled = false;
+                    this.editUploadDisabled = false;
+                }
+            },
+            
+            // 新增轮播图
+            addImgadv() {
+                if (this.newImgadv.filename == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '请上传轮播图片!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                
+                axios.post('/admin/imgadvAdd', qs.stringify({
+                    filename: this.newImgadv.filename,
+                    url: this.newImgadv.url
+                })).then(response => {
+                    this.$message({
+                        title: "成功",
+                        showClose: true,
+                        center: true,
+                        message: '新增轮播图成功!',
+                        type: 'success'
+                    });
+                    this.addDialogVisible = false;
+                    this.getimgadvlist();
+                }).catch(error => {
+                    this.$message.error('新增失败，请重试');
+                    console.log(error);
+                });
+            },
+            
+            // 更新轮播图
+            updateImgadv() {
+                if (this.editImgadv.filename == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '请上传轮播图片!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                
+                axios.post('/admin/imgadvEdit', qs.stringify({
+                    id: this.editImgadv.id,
+                    filename: this.editImgadv.filename,
+                    url: this.editImgadv.url
+                })).then(response => {
+                    this.$message({
+                        title: "成功",
+                        showClose: true,
+                        center: true,
+                        message: '修改轮播图成功!',
+                        type: 'success'
+                    });
+                    this.editDialogVisible = false;
+                    this.getimgadvlist();
+                }).catch(error => {
+                    this.$message.error('修改失败，请重试');
+                    console.log(error);
+                });
+            }
+		}
+	});
+
+	$(document).ready(function () {
+		$('#iframetop').load('top.html');
+	});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tourism.dao.PaintingDAO">
+    <resultMap id="BaseResultMap" type="com.tourism.entity.Painting">
+        <id column="id"  property="id"/>
+        <result column="name"  property="name"/>
+        <result column="filename"  property="filename"/>
+        <result column="categoryid"  property="categoryid"/>
+        <result column="content"  property="content"/>
+        <result column="isshow"  property="isshow"/>
+    </resultMap>
+
+
+    <insert id="add" parameterType="com.tourism.entity.Painting">
+        insert into Painting values(null,#{name},#{filename},#{categoryid},#{content},#{isshow},#{creattime})
+    </insert>
+
+
+    <update id="update" parameterType="com.tourism.entity.Painting">
+        update Painting
+        <set>
+            <if test="name!=null and name!=''">name=#{name},</if>
+            <if test="filename!=null and filename!=''">filename=#{filename},</if>
+            <if test="categoryid!=null and categoryid!=''">categoryid=#{categoryid},</if>
+            <if test="content!=null and content!=''">content=#{content},</if>
+            <if test="isshow!=null and isshow!=''">isshow=#{isshow},</if>
+        </set>
+        where id=#{id}
+    </update>
+
+
+    <select id="selectAll" parameterType="HashMap" resultMap="BaseResultMap">
+        select * from Painting where 1=1
+        <if test="key!=null and key!=''"> and name like "%"#{key}"%"</if>
+        <if test="key1!=null and key1!=''"> and categoryid in (select id from category where category.name like "%"#{key1}"%")</if>
+        <if test="isshow!=null and isshow!=''">  and isshow=#{isshow}</if>
+        <if test="categoryid!=null and categoryid!=''">and categoryid=#{categoryid}</if>
+        order by id desc
+    </select>
+
+
+    <select id="findById" parameterType="int" resultType="com.tourism.entity.Painting">
+      select * from Painting where id=#{id}
+    </select>
+
+    <delete id="delete" parameterType="int">
+      delete from painting where id=#{id}
+    </delete>
+
+
+</mapper>

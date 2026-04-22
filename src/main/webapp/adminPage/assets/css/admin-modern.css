@@ -1,0 +1,347 @@
+/* 福建文旅宣传系统后台管理 - 现代化样式 */
+
+/* 基础样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  overflow-x: hidden;
+}
+
+/* 主布局容器 */
+.kf-admin-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* 侧边栏样式 */
+.kf-sidebar {
+  width: 240px;
+  height: 100vh;
+  background: linear-gradient(to bottom, #3949AB, #303F9F);
+  color: #fff;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+  overflow-y: auto;
+}
+
+.kf-sidebar-collapsed {
+  width: 64px;
+}
+
+/* Logo区域 */
+.kf-logo-container {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.kf-logo {
+  height: 40px;
+  width: auto;
+}
+
+.kf-logo-text {
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  margin-left: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+}
+
+.kf-sidebar-collapsed .kf-logo-text {
+  display: none;
+}
+
+/* 菜单样式 */
+.kf-menu {
+  padding: 10px 0;
+}
+
+.kf-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  border-left: 3px solid transparent;
+}
+
+.kf-menu-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-left-color: #ff9800;
+}
+
+.kf-menu-item.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-left-color: #ff9800;
+}
+
+.kf-menu-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+  margin-right: 10px;
+}
+
+.kf-sidebar-collapsed .kf-menu-text {
+  display: none;
+}
+
+.kf-sidebar-collapsed .kf-menu-item {
+  padding: 12px;
+  justify-content: center;
+}
+
+.kf-sidebar-collapsed .kf-menu-icon {
+  margin-right: 0;
+  font-size: 20px;
+}
+
+/* 主内容区域 */
+.kf-main-content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 0 20px;
+  transition: all 0.3s ease;
+  min-height: 100vh;
+  background-color: #f5f7fa;
+  box-sizing: border-box;
+  width: calc(100% - 240px);
+}
+
+.kf-main-content-expanded {
+  margin-left: 64px;
+  width: calc(100% - 64px);
+}
+
+/* 顶部导航栏 */
+.kf-header {
+  height: 60px;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  margin: 0 -20px 20px -20px;
+}
+
+.kf-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.kf-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #3949AB;
+  padding: 5px;
+  border-radius: 4px;
+  margin-right: 15px;
+  transition: all 0.3s ease;
+}
+
+.kf-toggle-btn:hover {
+  background-color: rgba(57, 73, 171, 0.1);
+}
+
+.kf-header-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: #3949AB;
+}
+
+.kf-header-right {
+  display: flex;
+  align-items: center;
+}
+
+/* 用户信息区域 */
+.kf-user-info {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+}
+
+.kf-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #3949AB;
+}
+
+.kf-user-name {
+  margin-left: 10px;
+  font-weight: 500;
+}
+
+/* 下拉菜单 */
+.kf-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  padding: 10px 0;
+  display: none;
+  z-index: 9999;
+}
+
+.kf-user-info:hover .kf-dropdown {
+  display: block !important;
+}
+
+.kf-dropdown-item {
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.kf-dropdown-item:hover {
+  background-color: #f5f7fa;
+  color: #3949AB;
+}
+
+.kf-dropdown-icon {
+  margin-right: 10px;
+  font-size: 16px;
+}
+
+/* 内容区域 */
+.kf-content {
+  padding: 20px;
+  height: calc(100vh - 60px);
+  overflow: auto;
+}
+
+.kf-iframe-container {
+  width: 100%;
+  height: calc(100vh - 80px);
+  overflow: hidden;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  background-color: #fff;
+  position: relative; /* 确保可以正确定位iframe加载器 */
+}
+
+.kf-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  transition: opacity 0.3s ease; /* 添加过渡效果 */
+}
+
+/* iframe加载器样式 */
+.kf-iframe-loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  border-radius: 8px;
+}
+
+.kf-iframe-loader .kf-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3949AB;
+  border-radius: 50%;
+  animation: kf-spin 1s linear infinite;
+}
+
+/* 全局加载动画 */
+.kf-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.kf-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #3949AB;
+  border-radius: 50%;
+  animation: kf-spin 1s linear infinite;
+}
+
+@keyframes kf-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .kf-sidebar {
+    width: 0;
+    transform: translateX(-100%);
+  }
+  
+  .kf-sidebar-collapsed {
+    width: 64px;
+    transform: translateX(0);
+  }
+  
+  .kf-main-content {
+    margin-left: 0;
+    width: 100%;
+    padding: 0 15px;
+  }
+  
+  .kf-main-content-expanded {
+    margin-left: 64px;
+    width: calc(100% - 64px);
+  }
+  
+  .kf-header {
+    padding: 0 15px;
+    margin: 0 -15px 15px -15px;
+  }
+} 

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>八闽福建后台管理系统</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="assets/css/template-admin.css">
+    <style>
+        /* 国风风格页面样式 */
+        .kf-page-container {
+            padding: 30px;
+            background-color: #f9f6f2;
+            min-height: 100vh;
+            box-sizing: border-box;
+            background-image: url('../Tourism/img/lattice-pattern.png');
+            background-repeat: repeat;
+            background-size: 200px;
+            background-blend-mode: overlay;
+        }
+        
+        /* 页面标题区域 */
+        .kf-welcome-header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .kf-welcome-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #8a1a1a;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: "SimSun", serif;
+        }
+        
+        .kf-welcome-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+            font-family: "KaiTi", serif;
+            line-height: 1.6;
+        }
+        
+        .kf-divider {
+            width: 60%;
+            margin: 0 auto;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #c8161d, transparent);
+            margin-bottom: 30px;
+        }
+        
+        /* 快捷功能区 */
+        .kf-shortcut-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .kf-shortcut-card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            transition: all 0.3s ease;
+            border: 1px solid #eee;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .kf-shortcut-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 50px 50px 0;
+            border-color: transparent #f9f6f2 transparent transparent;
+        }
+        
+        .kf-shortcut-icon {
+            font-size: 36px;
+            color: #c8161d;
+            margin-bottom: 15px;
+            display: block;
+            text-align: center;
+        }
+        
+        .kf-shortcut-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-family: "KaiTi", serif;
+        }
+        
+        .kf-shortcut-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            text-align: center;
+        }
+        
+        /* 系统介绍区 */
+        .kf-intro-section {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-bottom: 40px;
+            position: relative;
+            border: 1px solid #eee;
+        }
+        
+        .kf-intro-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(to right, #c8161d, #e8383d);
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .kf-intro-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ddd;
+            font-family: "KaiTi", serif;
+        }
+        
+        .kf-intro-content {
+            font-size: 15px;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            text-indent: 2em;
+            font-family: "SimSun", serif;
+        }
+        
+        /* 景点浏览展示区 */
+        .kf-attractions {
+            margin-bottom: 40px;
+        }
+        
+        .kf-attractions-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-family: "KaiTi", serif;
+            position: relative;
+        }
+        
+        .kf-attractions-title::before,
+        .kf-attractions-title::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 100px;
+            height: 1px;
+            background-color: #ddd;
+        }
+        
+        .kf-attractions-title::before {
+            left: calc(50% - 150px);
+        }
+        
+        .kf-attractions-title::after {
+            right: calc(50% - 150px);
+        }
+        
+        .kf-attractions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .kf-attraction-item {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .kf-attraction-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .kf-attraction-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .kf-attraction-info {
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.9);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            backdrop-filter: blur(5px);
+        }
+        
+        .kf-attraction-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+            font-family: "KaiTi", serif;
+        }
+        
+        .kf-attraction-desc {
+            font-size: 13px;
+            color: #666;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        
+        /* 底部版权信息 */
+        .kf-footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #999;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .kf-page-container {
+                padding: 20px;
+            }
+            
+            .kf-welcome-title {
+                font-size: 24px;
+            }
+            
+            .kf-intro-section {
+                padding: 20px;
+            }
+            
+            .kf-shortcut-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="kf-page-container" id="app">
+    <!-- 欢迎标题区 -->
+    <div class="kf-welcome-header">
+        <h1 class="kf-welcome-title">八闽福建管理系统</h1>
+        <p class="kf-welcome-subtitle">传承千年文化，展示福建魅力，弘扬家乡精神</p>
+        <div class="kf-divider"></div>
+        <!-- 添加水墨装饰元素 -->
+        <div style="position: absolute; top: -20px; right: 20px; opacity: 0.2; z-index: -1;">
+            <img src="../Tourism/img/ink-splash.png" alt="装饰" style="width: 150px;">
+                    </div>
+                </div>
+    
+    <!-- 系统功能概述 -->
+    <div class="kf-system-overview" style="text-align: center; margin-bottom: 30px;">
+        <p style="font-size: 16px; color: #555; line-height: 1.8; font-family: 'SimSun', serif; max-width: 800px; margin: 0 auto;">
+            本系统集成了景点浏览管理、文章发布、用户管理、评论审核和非遗等核心功能，为八闽福建文旅宣传提供全方位的数字化支持。
+            管理员可通过以下模块高效管理各类文旅资源，实现福建文化旅游资源的有效展示与推广。
+        </p>
+            </div>
+    
+    <!-- 快捷功能区 -->
+    <div class="kf-shortcut-container">
+        <div class="kf-shortcut-card">
+            <i class="el-icon-picture-outline kf-shortcut-icon"></i>
+            <h3 class="kf-shortcut-title">景点浏览管理</h3>
+            <p class="kf-shortcut-desc">管理福建特色景点浏览信息，展示家乡风采，记录历史文化遗迹</p>
+            </div>
+        
+        <div class="kf-shortcut-card">
+            <i class="el-icon-document kf-shortcut-icon"></i>
+            <h3 class="kf-shortcut-title">文章管理</h3>
+            <p class="kf-shortcut-desc">发布文旅资讯，传播福建文化故事，弘扬地方特色文化</p>
+        </div>
+        
+        <div class="kf-shortcut-card">
+            <i class="el-icon-chat-line-square kf-shortcut-icon"></i>
+            <h3 class="kf-shortcut-title">评论管理</h3>
+            <p class="kf-shortcut-desc">审核用户评论，促进良好互动氛围，收集游客反馈</p>
+                    </div>
+        
+        <div class="kf-shortcut-card">
+            <i class="el-icon-dish kf-shortcut-icon"></i>
+            <h3 class="kf-shortcut-title">非遗</h3>
+            <p class="kf-shortcut-desc">展示福建非遗文化，传承传统非遗工艺</p>
+        </div>
+                        </div>
+
+    <!-- 系统介绍区 -->
+    <div class="kf-intro-section">
+        <h2 class="kf-intro-title">系统介绍</h2>
+        <p class="kf-intro-content">福建，山海画廊，世遗聚集地，不仅拥有秀丽的自然风光，更积淀了深厚的海洋文化与客家文化底蕴。 本系统旨在通过现代信息技术手段，全方位展示福建的世界遗产、独特非遗文化、秀美山水和地道风味，为游客提供一站式的福建旅游信息服务，同时也为福建文旅产业的数字化升级提供强力支撑。</p>
+        <p class="kf-intro-content">系统集成了景点浏览管理、非遗文化展示、文章发布、用户互动等功能模块，管理员可以通过本系统高效管理福建的各类文旅资讯，实现对八闽大地丰富文旅资源的精准宣传与推广。通过精心设计的前台展示界面，游客可以直观领略福建 “山海交融” 的独特魅力，激发出游热情，助力福建文旅产业的繁荣发展。</p>
+        <p class="kf-intro-content">特别是福建作为非遗大省，文化瑰宝灿若星河， 本系统专门开辟非遗文化展示专区，全面收录闽剧、福建木偶戏、脱胎漆器技艺、客家竹编等国家级非物质文化遗产。同时，系统深度融合福建美食文化，重点推介佛跳墙、沙茶面、土楼土鸡等特色佳肴，让游客在领略福建山水风光与人文风情的同时，也能品味这座山海之城独特的舌尖盛宴，感受 “清新福建” 的无限韵味。</p>
+        <!-- 添加装饰元素 -->
+        <div style="text-align: center; margin-top: 20px;">
+            <img src="../Tourism/img/decoration.png" alt="中国结装饰" style="width: 120px; opacity: 0.7;">
+        </div>
+    </div>
+
+    
+    <!-- 底部版权信息 -->
+    <div class="kf-footer">
+        <p>© {{ currentYear }} 八闽福建管理系统 版权所有</p>
+    </div>
+</div>
+<script src="assets/js/template-admin.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data() {
+            return {
+                currentYear: new Date().getFullYear(),
+                // 数据
+            }
+        },
+        methods: {
+            // 系统方法
+        }
+    });
+</script>
+</body>
+</html>

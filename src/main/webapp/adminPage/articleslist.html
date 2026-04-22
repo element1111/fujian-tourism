@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>八闽福建 - 景点浏览宣传管理</title>
+    <!-- 网站图标 -->
+    <link rel="shortcut icon" type="image/png" href="../Tourism/img/logo.png">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="assets/css/template-admin.css"/>
+</head>
+<body class="list-page">
+
+<div class="kf-page-container" id="app" v-cloak>
+    <!-- 页面标题区域 -->
+    <div class="kf-page-header">
+        <div class="kf-page-title">
+            <h2>景点浏览宣传管理</h2>
+        </div>
+        <div class="kf-search-area">
+            <div class="kf-search-box">
+                <input class="kf-search-input" v-model="key" type="text" placeholder="请输入标题搜索..." id="text-input">
+            </div>
+            <button class="kf-btn kf-btn-icon" @click="getarticleslist()">
+                <i class="el-icon-search"></i>
+            </button>
+            <button class="kf-btn" @click="showAddDialog">
+                <i class="el-icon-plus"></i> 新增景点浏览
+            </button>
+        </div>
+    </div>
+    
+    <!-- 内容卡片 -->
+    <div class="kf-card">
+        <div class="kf-card-header">
+            <h3>景点浏览列表</h3>
+        </div>
+        <div class="kf-card-body">
+            <div class="kf-table-container">
+                <div class="kf-table-responsive">
+                    <el-table :data="articleslist" border style="width: 100%">
+                        <el-table-column label="展示图" align="center" width="220">
+                            <template slot-scope="scope">
+                                <img :src="['../upload/'+scope.row.filename]" class="kf-image" style="width: 180px; height: 140px;">
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="title" label="标题" align="center"></el-table-column>
+                        <el-table-column prop="content" label="文章内容" align="center">
+                            <template slot-scope="scope">
+                                <p v-html="getTruncatedContent(scope.row.content,40)"></p>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="发布时间" align="center">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{scope.row.savetime}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column label="操作" align="center" width="240">
+                            <template slot-scope="scope">
+                                <el-button @click="handleEdit(scope.row)" type="text" size="small">
+                                    <i class="el-icon-edit"></i> 修改
+                                </el-button>
+                                <el-button @click="del(scope.row.id)" type="text" size="small">
+                                    <i class="el-icon-delete"></i> 删除
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <!-- 分页区域 -->
+            <div class="kf-pagination" id="demo1"></div>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <div class="kf-footer">
+        <p>八闽福建 © {{ currentYear }} 版权所有</p>
+    </div>
+    
+    <!-- 新增景点浏览弹窗 -->
+    <el-dialog
+        title="新增景点浏览"
+        :visible.sync="addDialogVisible"
+        width="60%"
+        :before-close="handleClose"
+        custom-class="kf-dialog">
+        <div class="kf-form-container">
+            <el-form :model="newArticle" label-width="100px" class="kf-form">
+                <el-form-item label="景点浏览标题">
+                    <el-input v-model="newArticle.title" placeholder="请输入景点浏览标题"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="景点浏览图片">
+                    <el-upload
+                        ref="upload"
+                        action=""
+                        list-type="picture-card"
+                        :on-preview="handlePictureCardPreview"
+                        :on-remove="handleRemove"
+                        :on-change="UploadImage"
+                        :file-list="fileList"
+                        :limit="1"
+                        multiple
+                        :class="{disabled:uploadDisabled}"
+                        :auto-upload="false">
+                        <i class="el-icon-plus"></i>
+                    </el-upload>
+                    <el-dialog :visible.sync="dialogVisible">
+                        <img width="100%" :src="dialogImageUrl" alt="图片扩大"/>
+                    </el-dialog>
+                </el-form-item>
+                
+                <el-form-item label="景点浏览介绍">
+                    <el-input v-model="newArticle.content" type="textarea" :rows="8" placeholder="请输入景点浏览介绍"></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="addDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addArticle">确 定</el-button>
+        </span>
+    </el-dialog>
+    
+    <!-- 修改景点浏览弹窗 -->
+    <el-dialog
+        title="修改景点浏览"
+        :visible.sync="editDialogVisible"
+        width="60%"
+        :before-close="handleClose"
+        custom-class="kf-dialog">
+        <div class="kf-form-container">
+            <el-form :model="editArticle" label-width="100px" class="kf-form">
+                <el-form-item label="景点浏览标题">
+                    <el-input v-model="editArticle.title" placeholder="请输入景点浏览标题"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="景点浏览图片">
+                    <el-upload
+                        ref="editUpload"
+                        action=""
+                        list-type="picture-card"
+                        :on-preview="handlePictureCardPreview"
+                        :on-remove="handleRemove"
+                        :on-change="UploadEditImage"
+                        :file-list="editFileList"
+                        :limit="1"
+                        multiple
+                        :class="{disabled:editUploadDisabled}"
+                        :auto-upload="false">
+                        <i class="el-icon-plus"></i>
+                    </el-upload>
+                    <el-dialog :visible.sync="dialogVisible">
+                        <img width="100%" :src="dialogImageUrl" alt="图片扩大"/>
+                    </el-dialog>
+                </el-form-item>
+                
+                <el-form-item label="景点浏览介绍">
+                    <el-input v-model="editArticle.content" type="textarea" :rows="8" placeholder="请输入景点浏览介绍"></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="editDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="updateArticle">确 定</el-button>
+        </span>
+    </el-dialog>
+</div>
+
+<script src="assets/js/template-admin.js"></script>
+<script type="text/javascript">
+	var qs = Qs
+	var addOK = UrlParam.paramValues("add") == null ? "no" : UrlParam.paramValues("add").toString()
+	var editOK = UrlParam.paramValues("edit") == null ? "no" : UrlParam.paramValues("edit").toString()
+	var pageNum = UrlParam.paramValues("pageNum") == null ? 1 : UrlParam.paramValues("pageNum").toString()
+	var vmm = new Vue({
+		el: '#app',
+		data: {
+			currentYear: new Date().getFullYear(),
+			articleslist: [{
+				filename: "no-img.png"
+			}],
+			key: '',
+			pageNum: pageNum,
+			pageSize: 3,
+			addOK: addOK,
+			editOK: editOK,
+            
+            // 新增景点浏览相关数据
+            addDialogVisible: false,
+            fileList: [],
+            uploadDisabled: false,
+            dialogVisible: false,
+            dialogImageUrl: '',
+            newArticle: {
+                title: '',
+                filename: 'no-img.png',
+                content: ''
+            },
+            
+            // 修改景点浏览相关数据
+            editDialogVisible: false,
+            editFileList: [],
+            editUploadDisabled: false,
+            editArticle: {
+                id: '',
+                title: '',
+                filename: 'no-img.png',
+                content: ''
+            }
+		},
+		mounted() {
+			if (this.addOK === "ok") {
+				this.$message({
+                    message: '新增景点浏览文章成功！',
+                    type: 'success'
+                });
+			}
+			if (this.editOK === "ok") {
+				this.$message({
+                    message: '文章编辑成功！',
+                    type: 'success'
+                });
+			}
+			this.getarticleslist()
+		},
+		methods: {
+            // 打开新增弹窗
+			showAddDialog(){
+				this.addDialogVisible = true;
+                // 重置表单
+                this.newArticle = {
+                    title: '',
+                    filename: 'no-img.png',
+                    content: ''
+                };
+                this.fileList = [];
+                this.uploadDisabled = false;
+			},
+			
+			// 打开修改弹窗
+			handleEdit(row){
+				this.editArticle = {
+                    id: row.id,
+                    title: row.title,
+                    filename: row.filename,
+                    content: row.content
+                };
+                
+                // 设置图片预览
+                if (row.filename && row.filename !== 'no-img.png') {
+                    this.editFileList = [{
+                        name: row.filename,
+                        url: '../upload/' + row.filename
+                    }];
+                    this.editUploadDisabled = true;
+                } else {
+                    this.editFileList = [];
+                    this.editUploadDisabled = false;
+                }
+                
+                this.editDialogVisible = true;
+			},
+            
+            handleClose(done) {
+                this.$confirm('确认关闭？未保存的数据将会丢失')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => {});
+            },
+            
+            //上传图片的方法（新增）
+            UploadImage(file, fileList) {
+                if (fileList.length >= 1) {
+                    // 上传一个后，后面添加隐藏
+                    this.uploadDisabled = true;
+                }
+                let fd = new FormData();
+                fd.append('file', file.raw); //传给后台接收的名字 file
+                axios.post('/admin/uploadImg', fd, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(response => {
+                    this.newArticle.filename = response.data.data.src;
+                });
+            },
+            
+            //上传图片的方法（修改）
+            UploadEditImage(file, fileList) {
+                if (fileList.length >= 1) {
+                    // 上传一个后，后面添加隐藏
+                    this.editUploadDisabled = true;
+                }
+                let fd = new FormData();
+                fd.append('file', file.raw); //传给后台接收的名字 file
+                axios.post('/admin/uploadImg', fd, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(response => {
+                    this.editArticle.filename = response.data.data.src;
+                });
+            },
+            
+            //预览图片功能
+            handlePictureCardPreview(file) {
+                this.dialogVisible = true;
+                this.dialogImageUrl = file.url;
+            },
+            
+            //移除展示图片功能
+            handleRemove(file, fileList) {
+                //添加+号
+                if (fileList.length === 0) {
+                    this.uploadDisabled = false;
+                    this.editUploadDisabled = false;
+                }
+            },
+            
+            // 新增景点浏览
+            addArticle() {
+                if (this.newArticle.title == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '景点浏览标题不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if (this.newArticle.content == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '景点浏览介绍不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                
+                axios.post('/articles/add', qs.stringify({
+                    title: this.newArticle.title,
+                    filename: this.newArticle.filename,
+                    content: this.newArticle.content
+                })).then(response => {
+                    this.$message({
+                        title: "成功",
+                        showClose: true,
+                        center: true,
+                        message: '新增景点浏览成功!',
+                        type: 'success'
+                    });
+                    this.addDialogVisible = false;
+                    this.getarticleslist();
+                }).catch(error => {
+                    this.$message.error('新增失败，请重试');
+                    console.log(error);
+                });
+            },
+            
+            // 更新景点浏览
+            updateArticle() {
+                if (this.editArticle.title == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '景点浏览标题不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if (this.editArticle.content == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '景点浏览介绍不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                
+                axios.post('/articles/edit', qs.stringify({
+                    id: this.editArticle.id,
+                    title: this.editArticle.title,
+                    filename: this.editArticle.filename,
+                    content: this.editArticle.content
+                })).then(response => {
+                    this.$message({
+                        title: "成功",
+                        showClose: true,
+                        center: true,
+                        message: '修改景点浏览成功!',
+                        type: 'success'
+                    });
+                    this.editDialogVisible = false;
+                    this.getarticleslist();
+                }).catch(error => {
+                    this.$message.error('修改失败，请重试');
+                    console.log(error);
+                });
+            },
+            
+			//当前用户列表
+			getarticleslist() {
+				axios.post('/articles/list', qs.stringify({
+					key: this.key,
+					pageSize: this.pageSize
+				})).then(response => {
+					layui.use(['laypage', 'layer'], function () {
+						var laypage = layui.laypage
+							, layer = layui.layer;
+						//总页数大于页码总数
+						laypage.render({
+							elem: 'demo1'
+							, theme: "#c8161d"
+							, curr: vmm.pageNum
+							, limit: vmm.pageSize
+							, count: response.data.list.length //数据总数
+							, jump: function (obj, first) {
+								vmm.pageNum = obj.curr
+								vmm.current_page(obj.curr, vmm.pageSize)
+								console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+							}
+						});
+					});
+				}).catch(error => {
+					console.log(error)
+				})
+			},
+			current_page(page, pageSize) {
+				axios.post('/articles/list', qs.stringify({
+					key: this.key,
+					pageNum: page,
+					pageSize: pageSize,
+				})).then(response => {
+					this.articleslist = response.data.pageInfo.list
+					console.log(this.articleslist)
+				}).catch(error => {
+					console.log(error)
+				})
+			},
+			del(id) {
+                this.$confirm('确定要删除此景点浏览吗？', '删除确认', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    customClass: 'kf-confirm-dialog'
+                }).then(() => {
+				    axios.post("/articles/del", qs.stringify({
+					    id: id,
+				    })).then(response => {
+					    this.$message({
+                            message: '删除成功！',
+                            type: 'success'
+                        });
+					    this.getarticleslist()
+				    }).catch(error => {
+                        this.$message.error('删除失败，请重试');
+					    console.log(error)
+				    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+			},
+			//截取html文本前num个字符
+			getTruncatedContent(content, num) {
+				// 使用DOM方法来处理HTML字符串，以获取纯文本
+				let truncatedText = '';
+				let tempDiv = document.createElement('div');
+				tempDiv.innerHTML = content;
+				truncatedText = tempDiv.textContent || tempDiv.innerText || '';
+
+				// 截取前num个字符，如果超过则添加...
+				if (truncatedText.length > num) {
+					truncatedText = truncatedText.substring(0, num) + '...';
+				}
+				return truncatedText;
+			},
+		}
+	});
+
+
+	$(document).ready(function () {
+		$('#iframetop').load('top.html');
+	});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>八闽福建 - 非遗宣传评论管理</title>
+    <!-- 网站图标 -->
+    <link rel="shortcut icon" type="image/png" href="../Tourism/img/logo.png">
+    <link rel="stylesheet" href="assets/css/template-admin.css"/>
+</head>
+<body class="list-page">
+
+<div class="kf-page-container" id="app" v-cloak>
+    <!-- 页面标题区域 -->
+    <div class="kf-page-header">
+        <div class="kf-page-title">
+            <h2>非遗宣传评论管理</h2>
+        </div>
+        <div class="kf-search-area">
+            <div class="kf-search-box">
+                <input class="kf-search-input" v-model="key" type="text" placeholder="请输入文章名称搜索..." id="text-input">
+            </div>
+            <button class="kf-btn kf-btn-icon" @click="getcommentlist()">
+                <i class="el-icon-search"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- 内容卡片 -->
+    <div class="kf-card">
+        <div class="kf-card-header">
+            <h3>评论列表</h3>
+        </div>
+        <div class="kf-card-body">
+            <div class="kf-table-container">
+                <div class="kf-table-responsive">
+                    <el-table :data="commentlist" border style="width: 100%">
+                        <el-table-column prop="articles.title" label="文章名称" align="center"></el-table-column>
+                        <el-table-column prop="member.tname" label="评论人" width="90" align="center"></el-table-column>
+                        <el-table-column prop="content" label="评论内容" align="center"></el-table-column>
+                        <el-table-column label="评论时间" align="center" width="135px">
+                            <template slot-scope="scope">
+                                <i class="el-icon-time"></i>
+                                <span style="margin-left: 10px">{{scope.row.savetime}}</span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="hfcontent" label="回复内容" align="center"></el-table-column>
+                        <el-table-column label="操作" align="center" width="240">
+                            <template slot-scope="scope">
+                                <el-button v-if="scope.row.hfcontent==null || scope.row.hfcontent==''" 
+                                    @click="openAddDialog(scope.row.id)" type="text" size="small">
+                                    <i class="el-icon-chat-line-square"></i> 回复
+                                </el-button>
+                                <el-button @click="del(scope.row.id)" type="text" size="small">
+                                    <i class="el-icon-delete"></i> 删除
+                                </el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <!-- 分页区域 -->
+            <div class="kf-pagination" id="demo1"></div>
+        </div>
+    </div>
+    
+    <!-- 页脚 -->
+    <div class="kf-footer">
+        <p>八闽福建 © {{ currentYear }} 版权所有</p>
+    </div>
+    
+    <!-- 评论回复弹窗 -->
+    <el-dialog
+        title="评论回复"
+        :visible.sync="openAdd"
+        width="50%"
+        :before-close="handleClose"
+        custom-class="kf-dialog">
+        <div class="kf-form-container">
+            <el-form :model="comment" label-width="80px" class="kf-form">
+                <el-form-item label="回复内容">
+                    <el-input v-model="comment.hfcontent" type="textarea" :rows="4" placeholder="请输入回复内容..."></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="closeAddDialog()">取 消</el-button>
+            <el-button type="primary" @click="add()">确 定</el-button>
+        </span>
+    </el-dialog>
+</div>
+
+<script src="assets/js/template-admin.js"></script>
+
+<script type="text/javascript">
+    var qs = Qs
+    var pageNum = UrlParam.paramValues("pageNum") == null ? 1 : UrlParam.paramValues("pageNum").toString()
+    var vmm = new Vue({
+        el: '#app',
+        data: {
+            currentYear: new Date().getFullYear(),
+            commentlist: [],
+            key: '',
+            pageNum: pageNum,
+            pageSize: 7,
+            openAdd: false,
+            comment: {
+                hfcontent: "",
+                id: "",
+            },
+        },
+        mounted() {
+            this.getcommentlist()
+        },
+        methods: {
+            //当前评论列表
+            getcommentlist() {
+                axios.post('/admin/commentList', qs.stringify({
+                    key: this.key,
+                    pageSize: this.pageSize
+                })).then(response => {
+                    layui.use(['laypage', 'layer'], function () {
+                        var laypage = layui.laypage
+                            , layer = layui.layer;
+                        //总页数大于页码总数
+                        laypage.render({
+                            elem: 'demo1'
+                            , theme: "#c8161d"
+                            , curr: vmm.pageNum
+                            , limit: vmm.pageSize
+                            , count: response.data.list.length //数据总数
+                            , jump: function (obj, first) {
+                                vmm.pageNum = obj.curr
+                                vmm.current_page(obj.curr, vmm.pageSize)
+                                console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                            }
+                        });
+                    });
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+
+            current_page(page, pageSize) {
+                axios.post('/admin/commentList', qs.stringify({
+                    key: this.key,
+                    pageNum: page,
+                    pageSize: pageSize,
+                })).then(response => {
+                    this.commentlist = response.data.pageInfo.list
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+
+            del(id) {
+                this.$confirm('确定要删除此评论吗？', '删除确认', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    customClass: 'kf-confirm-dialog'
+                }).then(() => {
+                    axios.post("/admin/commentDel", qs.stringify({
+                        id: id,
+                    })).then(response => {
+                        this.$message({
+                            message: '评论删除成功！',
+                            type: 'success'
+                        });
+                        this.getcommentlist()
+                    }).catch(error => {
+                        this.$message.error('删除失败，请重试');
+                        console.log(error)
+                    })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            
+            openAddDialog(id) {
+                this.openAdd = true
+                this.comment.id = id
+            },
+            
+            closeAddDialog() {
+                this.openAdd = false
+                this.comment.id = ''
+                this.comment.hfcontent = ''
+            },
+            
+            handleClose(done) {
+                this.$confirm('确认关闭？未保存的数据将会丢失')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => {});
+            },
+            
+            add() {
+                if (this.comment.hfcontent == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '回复内容不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                
+                axios.post('/admin/commentEdit', qs.stringify({
+                    id: this.comment.id,
+                    hfcontent: this.comment.hfcontent,
+                })).then(response => {
+                    this.$message({
+                        title: "成功",
+                        showClose: true,
+                        center: true,
+                        message: '回复成功!',
+                        type: 'success'
+                    });
+                    this.getcommentlist()
+                    this.closeAddDialog()
+                }).catch(error => {
+                    this.$message.error('回复失败，请重试');
+                    console.log(error)
+                })
+            },
+        }
+    });
+
+    $(document).ready(function () {
+        $('#iframetop').load('top.html');
+    });
+</script>
+
+</body>
+</html>

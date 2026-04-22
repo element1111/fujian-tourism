@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tourism.dao.AboutDAO">
+    <!-- 结果集 -->
+    <resultMap type="com.tourism.entity.About" id="AboutMap">
+        <result property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="filename" column="filename" />
+        <result property="category" column="category" />
+        <result property="opentime" column="opentime" />
+        <result property="tel" column="tel" />
+        <result property="addr" column="addr" />
+    </resultMap>
+
+    <!-- 基本字段 -->
+    <sql id="Base_Column_List">
+        *
+    </sql>
+
+    <!-- 查询单个 -->
+    <select id="findById" resultType="com.tourism.entity.About">
+        select
+          <include refid="Base_Column_List" />
+        from about
+        where id = #{id}
+    </select>
+
+    <!-- 查询全部 -->
+    <select id="selectAll"  resultMap="AboutMap">
+        select
+        <include refid="Base_Column_List" />
+        from about  where 1=1
+        <if test="key!=null and key!=''">
+        and name like "%"#{key}"%"
+        </if>
+
+                    <if test="id != null">
+                and id = #{id}
+            </if>
+                    <if test="name != null and name != ''">
+                and name = #{name}
+            </if>
+                    <if test="filename != null and filename != ''">
+                and filename = #{filename}
+            </if>
+                    <if test="category != null and category != ''">
+                and category = #{category}
+            </if>
+                    <if test="opentime != null and opentime != ''">
+                and opentime = #{opentime}
+            </if>
+                    <if test="tel != null and tel != ''">
+                and tel = #{tel}
+            </if>
+                    <if test="addr != null and addr != ''">
+                and addr = #{addr}
+            </if>
+
+        order by id desc
+    </select>
+
+
+
+    <!-- 新增所有列 -->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into about(id, name, filename, category, opentime, tel, addr)
+        values ( #{id}, #{name}, #{filename}, #{category}, #{opentime}, #{tel}, #{addr})
+    </insert>
+
+
+    <!-- 通过主键修改数据 -->
+    <update id="update">
+        update manchuculture_db.about
+        <set>
+                    <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+                    <if test="filename != null and filename != ''">
+                filename = #{filename},
+            </if>
+                    <if test="category != null and category != ''">
+                category = #{category},
+            </if>
+                    <if test="opentime != null and opentime != ''">
+                opentime = #{opentime},
+            </if>
+                    <if test="tel != null and tel != ''">
+                tel = #{tel},
+            </if>
+                    <if test="addr != null and addr != ''">
+                addr = #{addr},
+            </if>
+                </set>
+        where id = #{id}
+    </update>
+
+    <!--通过主键删除-->
+    <delete id="delete">
+        delete from about where id = #{id}
+    </delete>
+
+</mapper>

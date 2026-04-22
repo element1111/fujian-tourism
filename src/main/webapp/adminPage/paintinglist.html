@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>八闽福建 - 景点宣传管理</title>
+    <!-- 网站图标 -->
+    <link rel="shortcut icon" type="image/png" href="../Tourism/img/logo.png">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="assets/css/template-admin.css"/>
+</head>
+<body class="list-page">
+
+<div class="kf-page-container" id="app" v-cloak>
+    <!-- 页面标题区域 -->
+    <div class="kf-page-header">
+        <div class="kf-page-title">
+            <h2>景点浏览宣传管理</h2>
+                        </div>
+        <div class="kf-search-area">
+            <div class="kf-search-box">
+                <input class="kf-search-input" v-model="key" type="text" placeholder="请输入美食名称..." id="text-input">
+                                    </div>
+            <div class="kf-search-box">
+                <input class="kf-search-input" v-model="key1" type="text" placeholder="请输入分类名称..." id="text-input">
+                                    </div>
+            <button class="kf-btn kf-btn-icon" @click="getpaintinglist()">
+                <i class="el-icon-search"></i>
+            </button>
+            <button class="kf-btn" @click="showAddDialog">
+                <i class="el-icon-plus"></i> 新增美食
+            </button>
+                        </div>
+                    </div>
+    
+    <!-- 内容卡片 -->
+    <div class="kf-card">
+        <div class="kf-card-header">
+            <h3>美食列表</h3>
+        </div>
+        <div class="kf-card-body">
+            <div class="kf-table-container">
+                <div class="kf-table-responsive">
+                                    <el-table :data="paintinglist" border style="width: 100%">
+                                        <el-table-column prop="name" label="名称" align="center"></el-table-column>
+                                        <el-table-column label="图片" align="center" width="220">
+                                            <template slot-scope="scope">
+                                <img :src="['../upload/'+scope.row.filename]" class="kf-image" style="width: 180px; height: 140px;">
+                                            </template>
+                                        </el-table-column>
+                        <el-table-column prop="categoryname" label="美食类型" width="120" align="center"></el-table-column>
+                        <el-table-column label="详细介绍" align="center">
+                                            <template slot-scope="scope">
+                                <p v-html="getTruncatedContent(scope.row.content,10)"></p>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column label="发布时间" align="center">
+                                            <template slot-scope="scope">
+                                                <i class="el-icon-time"></i>
+                                                <span style="margin-left: 10px">{{scope.row.creattime}}</span>
+                                            </template>
+                                        </el-table-column>
+                                        <el-table-column prop="isshow" label="是否展示" align="center" width="80"></el-table-column>
+                        <el-table-column label="操作" align="center" width="280">
+                                            <template slot-scope="scope">
+                                <el-button v-if="scope.row.isshow=='yes'" @click="isshowEdit(scope.row.id)" type="text" size="small">
+                                    <i class="el-icon-view"></i> 展示
+                                </el-button>
+                                <el-button v-if="scope.row.isshow=='no'" @click="isshowEdit(scope.row.id)" type="text" size="small">
+                                    <i class="el-icon-hide"></i> 关闭
+                                </el-button>
+                                <el-button @click="handleEdit(scope.row)" type="text" size="small">
+                                    <i class="el-icon-edit"></i> 修改
+                                                </el-button>
+                                <el-button @click="del(scope.row.id)" type="text" size="small">
+                                    <i class="el-icon-delete"></i> 删除
+                                                </el-button>
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                </div>
+            </div>
+            <!-- 分页区域 -->
+            <div class="kf-pagination" id="demo1"></div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="kf-footer">
+        <p>八闽福建 © {{ currentYear }} 版权所有</p>
+    </div>
+    
+    <!-- 新增美食弹窗 -->
+    <el-dialog
+        title="新增美食"
+        :visible.sync="addDialogVisible"
+        width="60%"
+        :before-close="handleClose"
+        custom-class="kf-dialog">
+        <div class="kf-form-container">
+            <el-form :model="newPainting" label-width="100px" class="kf-form">
+                <el-form-item label="美食名称">
+                    <el-input v-model="newPainting.name" placeholder="请输入美食名称"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="美食图片">
+                    <el-upload
+                        ref="upload"
+                        action=""
+                        list-type="picture-card"
+                        :on-preview="handlePictureCardPreview"
+                        :on-remove="handleRemove"
+                        :on-change="UploadImage"
+                        :file-list="fileList"
+                        :limit="1"
+                        multiple
+                        :class="{disabled:uploadDisabled}"
+                        :auto-upload="false">
+                        <i class="el-icon-plus"></i>
+                    </el-upload>
+                    <el-dialog :visible.sync="dialogVisible">
+                        <img width="100%" :src="dialogImageUrl" alt="图片扩大"/>
+                    </el-dialog>
+                </el-form-item>
+                
+                <el-form-item label="城市详情">
+                    <el-select v-model="newPainting.categoryid" placeholder="请选择城市详情" style="width: 100%">
+                        <el-option v-for="(item,index) in categorylist" :key="index" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="详细介绍">
+                    <el-input v-model="newPainting.content" type="textarea" :rows="6" placeholder="请输入详细介绍"></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="addDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addPainting">确 定</el-button>
+        </span>
+    </el-dialog>
+    
+    <!-- 修改美食弹窗 -->
+    <el-dialog
+        title="修改美食"
+        :visible.sync="editDialogVisible"
+        width="60%"
+        :before-close="handleClose"
+        custom-class="kf-dialog">
+        <div class="kf-form-container">
+            <el-form :model="editPainting" label-width="100px" class="kf-form">
+                <el-form-item label="美食名称">
+                    <el-input v-model="editPainting.name" placeholder="请输入美食名称"></el-input>
+                </el-form-item>
+                
+                <el-form-item label="美食图片">
+                    <el-upload
+                        ref="editUpload"
+                        action=""
+                        list-type="picture-card"
+                        :on-preview="handlePictureCardPreview"
+                        :on-remove="handleRemove"
+                        :on-change="UploadEditImage"
+                        :file-list="editFileList"
+                        :limit="1"
+                        multiple
+                        :class="{disabled:editUploadDisabled}"
+                        :auto-upload="false">
+                        <i class="el-icon-plus"></i>
+                    </el-upload>
+                    <el-dialog :visible.sync="dialogVisible">
+                        <img width="100%" :src="dialogImageUrl" alt="图片扩大"/>
+                    </el-dialog>
+                </el-form-item>
+                
+                <el-form-item label="城市详情">
+                    <el-select v-model="editPainting.categoryid" placeholder="请选择城市详情" style="width: 100%">
+                        <el-option v-for="(item,index) in categorylist" :key="index" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="详细介绍">
+                    <el-input v-model="editPainting.content" type="textarea" :rows="6" placeholder="请输入详细介绍"></el-input>
+                </el-form-item>
+            </el-form>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="editDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="updatePainting">确 定</el-button>
+        </span>
+    </el-dialog>
+</div>
+
+<script src="assets/js/template-admin.js"></script>
+<script type="text/javascript">
+    var qs = Qs
+    var addOK=UrlParam.paramValues("add") == null ? "no" : UrlParam.paramValues("add").toString()
+	var editOK=UrlParam.paramValues("edit") == null ? "no" : UrlParam.paramValues("edit").toString()
+    var pageNum = UrlParam.paramValues("pageNum") == null ? 1 : UrlParam.paramValues("pageNum").toString()
+    var vmm = new Vue({
+        el: '#app',
+        data: {
+            currentYear: new Date().getFullYear(),
+            paintinglist: [],
+            key: '',
+            key1: '',
+            pageNum: pageNum,
+            pageSize: 3,
+			addOK:addOK,
+			editOK:editOK,
+            
+            // 新增美食相关数据
+            addDialogVisible: false,
+            fileList: [],
+            uploadDisabled: false,
+            dialogVisible: false,
+            dialogImageUrl: '',
+            newPainting: {
+                name: '',
+                filename: 'no-img.png',
+                categoryid: '',
+                content: ''
+            },
+            
+            // 修改美食相关数据
+            editDialogVisible: false,
+            editFileList: [],
+            editUploadDisabled: false,
+            editPainting: {
+                id: '',
+                name: '',
+                filename: 'no-img.png',
+                categoryid: '',
+                content: ''
+            },
+            
+            // 分类列表
+            categorylist: []
+        },
+        mounted() {
+			if(this.addOK=="ok"){
+				this.$message({
+                    message: '新增美食成功！',
+                    type: 'success'
+                });
+            }
+			if(this.editOK=="ok"){
+				this.$message({
+                    message: '美食信息编辑成功！',
+                    type: 'success'
+                });
+			}
+            this.getpaintinglist()
+            this.getCategory()
+        },
+        methods: {
+			// 打开新增弹窗
+			showAddDialog(){
+				this.addDialogVisible = true;
+                // 重置表单
+                this.newPainting = {
+                    name: '',
+                    filename: 'no-img.png',
+                    categoryid: '',
+                    content: ''
+                };
+                this.fileList = [];
+                this.uploadDisabled = false;
+			},
+			
+			// 打开修改弹窗
+			handleEdit(row){
+				this.editPainting = {
+                    id: row.id,
+                    name: row.name,
+                    filename: row.filename,
+                    categoryid: row.categoryid,
+                    content: row.content
+                };
+                
+                // 设置图片预览
+                if (row.filename && row.filename !== 'no-img.png') {
+                    this.editFileList = [{
+                        name: row.filename,
+                        url: '../upload/' + row.filename
+                    }];
+                    this.editUploadDisabled = true;
+                } else {
+                    this.editFileList = [];
+                    this.editUploadDisabled = false;
+                }
+                
+                this.editDialogVisible = true;
+			},
+            
+            handleClose(done) {
+                this.$confirm('确认关闭？未保存的数据将会丢失')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => {});
+            },
+            
+            //上传图片的方法（新增）
+            UploadImage(file, fileList) {
+                if (fileList.length >= 1) {
+                    // 上传一个后，后面添加隐藏
+                    this.uploadDisabled = true;
+                }
+                let fd = new FormData();
+                fd.append('file', file.raw); //传给后台接收的名字 file
+                axios.post('/admin/uploadImg', fd, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(response => {
+                    this.newPainting.filename = response.data.data.src;
+                });
+            },
+            
+            //上传图片的方法（修改）
+            UploadEditImage(file, fileList) {
+                if (fileList.length >= 1) {
+                    // 上传一个后，后面添加隐藏
+                    this.editUploadDisabled = true;
+                }
+                let fd = new FormData();
+                fd.append('file', file.raw); //传给后台接收的名字 file
+                axios.post('/admin/uploadImg', fd, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(response => {
+                    this.editPainting.filename = response.data.data.src;
+                });
+            },
+            
+            //预览图片功能
+            handlePictureCardPreview(file) {
+                this.dialogVisible = true;
+                this.dialogImageUrl = file.url;
+            },
+            
+            //移除展示图片功能
+            handleRemove(file, fileList) {
+                //添加+号
+                if (fileList.length === 0) {
+                    this.uploadDisabled = false;
+                    this.editUploadDisabled = false;
+                }
+            },
+            
+            // 新增美食
+            addPainting() {
+                if (this.newPainting.name == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '美食名称不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if (this.newPainting.categoryid == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '请选择城市详情!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if (this.newPainting.content == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '详细介绍不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                
+                axios.post('/painting/insert', qs.stringify({
+                    name: this.newPainting.name,
+                    filename: this.newPainting.filename,
+                    categoryid: this.newPainting.categoryid,
+                    content: this.newPainting.content
+                })).then(response => {
+                    this.$message({
+                        title: "成功",
+                        showClose: true,
+                        center: true,
+                        message: '新增美食成功!',
+                        type: 'success'
+                    });
+                    this.addDialogVisible = false;
+                    this.getpaintinglist();
+                }).catch(error => {
+                    this.$message.error('新增失败，请重试');
+                    console.log(error);
+                });
+            },
+            
+            // 更新美食
+            updatePainting() {
+                if (this.editPainting.name == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '美食名称不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if (this.editPainting.categoryid == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '请选择城市详情!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                if (this.editPainting.content == "") {
+                    this.$message({
+                        title: "警告",
+                        showClose: true,
+                        center: true,
+                        message: '详细介绍不能为空!',
+                        type: 'warning'
+                    });
+                    return false;
+                }
+                
+                axios.post('/painting/edit', qs.stringify({
+                    id: this.editPainting.id,
+                    name: this.editPainting.name,
+                    filename: this.editPainting.filename,
+                    categoryid: this.editPainting.categoryid,
+                    content: this.editPainting.content
+                })).then(response => {
+                    this.$message({
+                        title: "成功",
+                        showClose: true,
+                        center: true,
+                        message: '修改美食成功!',
+                        type: 'success'
+                    });
+                    this.editDialogVisible = false;
+                    this.getpaintinglist();
+                }).catch(error => {
+                    this.$message.error('修改失败，请重试');
+                    console.log(error);
+                });
+            },
+            
+            // 获取分类列表
+            getCategory() {
+                axios.post('/category/list').then(response => {
+                    this.categorylist = response.data.list
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+            
+            //当前列表
+            getpaintinglist() {
+                axios.post('/painting/list', qs.stringify({
+                    key: this.key,
+                    key1: this.key1,
+                    pageSize: this.pageSize
+                })).then(response => {
+                    layui.use(['laypage', 'layer'], function () {
+                        var laypage = layui.laypage
+                            , layer = layui.layer;
+                        //总页数大于页码总数
+                        laypage.render({
+                            elem: 'demo1'
+                            , theme: "#c8161d"
+                            , curr: vmm.pageNum
+                            , limit: vmm.pageSize
+                            , count: response.data.list.length //数据总数
+                            , jump: function (obj, first) {
+                                vmm.pageNum = obj.curr
+                                vmm.current_page(obj.curr, vmm.pageSize)
+                                console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                            }
+                        });
+                    });
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+
+
+            current_page(page, pageSize) {
+                axios.post('/painting/list', qs.stringify({
+                    key: this.key,
+                    key1: this.key1,
+                    pageNum: page,
+                    pageSize: pageSize,
+                })).then(response => {
+                    this.paintinglist = response.data.pageInfo.list
+
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+            del(id) {
+                this.$confirm('确定要删除此美食吗？', '删除确认', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    customClass: 'kf-confirm-dialog'
+                }).then(() => {
+                    axios.post("/admin/productDel", qs.stringify({
+                    id: id,
+                })).then(response => {
+                        this.$message({
+                            message: '删除成功！',
+                            type: 'success'
+                        });
+                    this.getpaintinglist()
+                }).catch(error => {
+                        this.$message.error('删除失败，请重试');
+                    console.log(error)
+                })
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            },
+            //截取html文本前num个字符
+			getTruncatedContent(content, num) {
+				// 使用DOM方法来处理HTML字符串，以获取纯文本
+				let truncatedText = '';
+				let tempDiv = document.createElement('div');
+				tempDiv.innerHTML = content;
+				truncatedText = tempDiv.textContent || tempDiv.innerText || '';
+
+				// 截取前num个字符，如果超过则添加...
+				if (truncatedText.length > num) {
+					truncatedText = truncatedText.substring(0, num) + '...';
+				}
+				return truncatedText;
+			},
+
+            isshowEdit(id) {
+                axios.post("/painting/isshow", qs.stringify({
+                    id: id,
+                })).then(response => {
+                    this.getpaintinglist()
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+        }
+    });
+
+    $(document).ready(function () {
+        $('#iframetop').load('top.html');
+    });
+</script>
+
+</body>
+</html>

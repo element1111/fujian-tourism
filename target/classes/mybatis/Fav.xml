@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tourism.dao.FavDAO">
+    <resultMap type="com.tourism.entity.Fav" id="BaseResultMap">
+      <id column="id" property="id" jdbcType="INTEGER"/>
+      <result column="memberid" property="memberid" jdbcType="INTEGER"/>
+        <result column="articlesid" property="articlesid" jdbcType="INTEGER"/>
+    </resultMap>
+
+
+
+    <insert id="add" parameterType="com.tourism.entity.Fav">
+        insert into Fav values(null,#{memberid},#{articlesid})
+    </insert>
+
+    <select id="selectAll" parameterType="hashmap" resultMap="BaseResultMap">
+        select * from fav f left join articles p on f.articlesid = p.id
+        where 1=1
+      <if test="memberid!=null">
+      and f.memberid=#{memberid}
+      </if>
+        <if test="articlesid!=null">
+            and f.articlesid=#{articlesid}
+        </if>
+      order by f.id desc
+    </select>
+
+    <delete id="delete" parameterType="int">
+      delete from Fav where id=#{id}
+    </delete>
+
+    <delete id="deleteByMember" parameterType="int">
+        delete from Fav where memberid=#{id}
+    </delete>
+
+
+</mapper>

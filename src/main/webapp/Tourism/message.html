@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8"/>
+    <title>留言互动 - 八闽福建</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="icon" type="image/x-icon" href="favicon.ico"/>
+    <link rel="stylesheet" href="css/style.css"/>
+    <link rel="stylesheet" href="../css/element_ui.css"/>
+</head>
+<body>
+    <div id="app" v-cloak>
+        <!-- 国风背景图案 -->
+        <div class="chinese-pattern"></div>
+
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="container header-inner">
+                <div class="logo">
+                    <img src="img/logo.png" alt="福建文旅">
+                    <div class="logo-text">八闽福建</div>
+                </div>
+                <nav class="nav">
+                    <ul class="nav-list">
+                        <li class="nav-item"><a href="index.html" class="nav-link">首页</a></li>
+                        <li class="nav-item"><a href="food.html" class="nav-link">景点浏览</a></li>
+                        <li class="nav-item"><a href="scenic.html" class="nav-link">非遗探索</a></li>
+                        <li class="nav-item"><a href="activity.html" class="nav-link">活动资讯</a></li>
+                        <li class="nav-item"><a href="message.html" class="nav-link active">留言互动</a></li>
+                        <li class="nav-item"><a href="personal.html" class="nav-link">个人中心</a></li>
+                    </ul>
+                    <div class="menu-toggle">
+                        <i class="el-icon-menu"></i>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="container">
+                <div class="page-title">
+                    <h1>留言互动</h1>
+                </div>
+
+                <!-- 留言表单 -->
+                <div class="message-form">
+                    <h3 class="form-title">发表您的留言</h3>
+                    <div class="form-group">
+                        <label class="form-label">留言内容</label>
+                        <textarea class="form-control" v-model="content" rows="5" placeholder="请输入您的留言内容..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn" @click="addchat">提交留言</button>
+                    </div>
+                </div>
+
+                <!-- 留言列表 -->
+                <div class="message-list-container">
+                    <h3 class="list-title">留言列表</h3>
+                    <div class="message-list">
+                        <div class="message-item" v-for="chat in chatlist" :key="chat.id">
+                            <div class="message-header">
+                                <div class="message-author-info">
+                                    <img class="author-avatar" :src="chat.member && chat.member.filename ? 'http://127.0.0.1:8088/upload/'+chat.member.filename : 'http://127.0.0.1:8088/upload/icon1.png'" alt="用户头像">
+                                    <span class="message-author">{{chat.member ? chat.member.tname : '游客'}}</span>
+                                </div>
+                                <span class="message-time">{{formatDate(chat.savetime)}}</span>
+                            </div>
+                            <div class="message-content">
+                                {{chat.content}}
+                            </div>
+                            <div class="message-reply" v-if="chat.hfcontent">
+                                <div class="reply-header">管理员回复：</div>
+                                <div class="reply-content">{{chat.hfcontent}}</div>
+                                <div class="reply-time" v-if="chat.hftime">{{formatDate(chat.hftime)}}</div>
+                            </div>
+                        </div>
+
+                        <div class="empty-message" v-if="chatlist.length === 0">
+                            <i class="el-icon-chat-dot-square"></i>
+                            <p>暂无留言，快来发表第一条留言吧！</p>
+                        </div>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div id="demo1" class="pagination"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-column">
+                        <h3 class="footer-title">关于我们</h3>
+                        <p class="footer-text">八闽福建深耕本土文旅资源，积极推广闽越文化、特色美食与山海风光，为广大游客提供全方位、高品质的福建旅游信息服务</p>
+                    </div>
+                    <div class="footer-column">
+                        <h3 class="footer-title">联系方式</h3>
+                        <p class="footer-text">地址：福建省厦门市翔安区</p>
+                        <p class="footer-text">电话：17262016429</p>
+                        <p class="footer-text">邮箱：997463290@qq.com</p>
+                    </div>
+                    <div class="footer-column">
+                        <h3 class="footer-title">快速链接</h3>
+                        <ul class="footer-links">
+                            <li class="footer-link"><a href="index.html">首页</a></li>
+                            <li class="footer-link"><a href="scenic.html">景点浏览</a></li>
+                            <li class="footer-link"><a href="feiyi.html">非遗探索</a></li>
+                            <li class="footer-link"><a href="activity.html">活动资讯</a></li>
+                            <li class="footer-link"><a href="message.html">留言互动</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; Copyright &copy; {{ currentYear }} 八闽福建 <a target="_blank" href="/adminPage/login.html">后台管理</a></p>
+                    <a class="to-top-link"><img src="img/to-top.png" class="to-top" alt="回到顶部"/></a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 引入脚本 -->
+    <script src="../js/axios/vue.js"></script>
+    <script src="../js/axios/axios.min.js"></script>
+    <script src="../js/axios/qs.js"></script>
+    <script src="../js/axios/getUrlParams.js"></script>
+    <script src="../js/axios/element_ui.js"></script>
+    <script src="../js/jquery/jquery-3.2.1.min.js"></script>
+    <script src="../js/layui/layui.js"></script>
+    <script>
+        var qs = Qs;
+        var pageNum = UrlParam.paramValues("pageNum") == null ? 1 : UrlParam.paramValues("pageNum").toString();
+        var vmm = new Vue({
+            el: "#app",
+            data: {
+                currentYear: new Date().getFullYear(),
+                chatlist: [],
+                content: "",
+                pageNum: pageNum,
+                pageSize: 10,
+            },
+            mounted() {
+                this.getchatlist();
+            },
+            methods: {
+                getchatlist() {
+                    // 使用与contact.html相同的接口
+                    axios.post('/chatLb', qs.stringify({
+                        pageSize: this.pageSize
+                    })).then(response => {
+                        if (response.data && response.data.list) {
+                            // 初始化分页
+                            layui.use(['laypage', 'layer'], function () {
+                                var laypage = layui.laypage;
+                                var layer = layui.layer;
+
+                                laypage.render({
+                                    elem: 'demo1',
+                                    theme: "#8B2323",
+                                    curr: vmm.pageNum,
+                                    limit: vmm.pageSize,
+                                    count: response.data.list.length, //数据总数
+                                    jump: function (obj, first) {
+                                        vmm.pageNum = obj.curr;
+                                        vmm.current_page(obj.curr, vmm.pageSize);
+                                    }
+                                });
+                            });
+
+                            // 获取第一页数据
+                            this.current_page(this.pageNum, this.pageSize);
+                        } else {
+                            this.chatlist = [];
+                            console.log('没有获取到留言数据');
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                        this.$message.error('获取留言列表失败');
+                    });
+                },
+                current_page(page, pageSize) {
+                    // 使用与contact.html相同的接口
+                    axios.post('/chatLb', qs.stringify({
+                        pageNum: page,
+                        pageSize: pageSize,
+                    })).then(response => {
+                        if (response.data && response.data.pageInfo && response.data.pageInfo.list) {
+                            this.chatlist = response.data.pageInfo.list;
+                        } else if (response.data && response.data.list) {
+                            // 尝试直接获取list
+                            const startIndex = (page - 1) * pageSize;
+                            const endIndex = startIndex + pageSize;
+                            this.chatlist = response.data.list.slice(startIndex, endIndex);
+                        } else {
+                            this.chatlist = [];
+                            console.log('没有获取到留言数据');
+                        }
+                    }).catch(error => {
+                        console.log(error);
+                        this.$message.error('获取留言列表失败');
+                    });
+                },
+                addchat() {
+                    if (!this.content) {
+                        this.$message.error('请输入留言内容');
+                        return;
+                    }
+
+                    // 检查用户是否登录
+                    if (!sessionStorage.getItem("uname")) {
+                        this.$confirm('您尚未登录，是否前往登录页面?', '提示', {
+                            confirmButtonText: '去登录',
+                            cancelButtonText: '取消',
+                            type: 'warning'
+                        }).then(() => {
+                            window.location.href = 'personal.html';
+                        }).catch(() => {
+                            this.$message.info('您可以登录后再发表留言');
+                        });
+                        return;
+                    }
+
+                    // 使用与contact.html相同的接口
+                    axios.post('/chatAdd', qs.stringify({
+                        content: this.content
+                    })).then(response => {
+                        this.$message.success('留言成功');
+                        this.content = "";
+
+                        // 重置为第一页
+                        this.pageNum = 1;
+
+                        // 重新获取留言列表
+                        this.getchatlist();
+
+                        // 滚动到留言列表顶部
+                        this.$nextTick(() => {
+                            const messageList = document.querySelector('.message-list');
+                            if (messageList) {
+                                messageList.scrollTop = 0;
+                            }
+
+                            // 滚动页面到留言列表容器
+                            const listContainer = document.querySelector('.message-list-container');
+                            if (listContainer) {
+                                listContainer.scrollIntoView({ behavior: 'smooth' });
+                            }
+                        });
+                    }).catch(error => {
+                        console.log(error);
+                        this.$message.error('留言失败，请稍后再试');
+                    });
+                },
+                //格式化日期
+                formatDate(timestamp) {
+                    if (!timestamp) return '';
+
+                    // 检查timestamp是否为字符串，如果是则尝试转换
+                    if (typeof timestamp === 'string') {
+                        // 如果是日期字符串格式(如：2023-01-01 12:00:00)，直接返回
+                        if (timestamp.includes('-')) {
+                            return timestamp;
+                        }
+                        // 尝试将字符串转为数字
+                        timestamp = Number(timestamp);
+                    }
+
+                    // 检查timestamp是否为有效数字
+                    if (isNaN(timestamp) || timestamp <= 0) {
+                        return '未知时间';
+                    }
+
+                    // 检查时间戳长度，如果是10位（秒），则转为13位（毫秒）
+                    if (timestamp.toString().length === 10) {
+                        timestamp = timestamp * 1000;
+                    }
+
+                    const date = new Date(timestamp);
+
+                    // 检查日期是否有效
+                    if (date.getFullYear() < 2000) {
+                        return '未知时间';
+                    }
+
+                    return date.getFullYear() + '-' +
+                           (date.getMonth() + 1).toString().padStart(2, '0') + '-' +
+                           date.getDate().toString().padStart(2, '0') + ' ' +
+                           date.getHours().toString().padStart(2, '0') + ':' +
+                           date.getMinutes().toString().padStart(2, '0');
+                }
+            }
+        });
+    </script>
+
+    <style>
+        /* 留言互动页面特定样式 */
+        .message-list-container {
+            margin-top: 40px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            padding: 30px;
+        }
+
+        .list-title {
+            font-size: 22px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .message-list {
+            max-height: 800px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .message-item {
+            margin-bottom: 25px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .message-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: center;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 15px;
+        }
+
+        .message-author-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+        }
+
+        .message-author {
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 16px;
+        }
+
+        .message-time {
+            color: #999;
+            font-size: 14px;
+            background-color: #f9f9f9;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        .message-content {
+            margin-bottom: 15px;
+            line-height: 1.6;
+            padding: 5px 0;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .message-reply {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 3px solid #4caf50;
+            position: relative;
+        }
+
+        .reply-header {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #4caf50;
+        }
+
+        .reply-content {
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .reply-time {
+            position: absolute;
+            right: 15px;
+            bottom: 10px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 60px 0;
+            color: #999;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .empty-message i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+            color: #ddd;
+        }
+
+        .pagination {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        /* 表单样式优化 */
+        .message-form {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        .form-title {
+            font-size: 22px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            resize: vertical;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(139, 35, 35, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #701a1a;
+        }
+
+        @media (max-width: 768px) {
+            .message-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .message-time {
+                margin-top: 10px;
+            }
+
+            .message-form, .message-list-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</body>
+</html>
